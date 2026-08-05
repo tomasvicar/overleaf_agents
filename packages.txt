@@ -1,0 +1,104 @@
+# TeX Live packages installed on top of scheme-basic.
+#
+# Keep this list as small as it can be while still compiling real manuscripts.
+# Blank lines and #-comments are ignored.
+#
+# If a paper needs something that is not here:
+#   1. add it below, open a PR -> CI rebuilds and pushes a new image, or
+#   2. install it at runtime into a persistent texmf volume (see README).
+
+# --- build driver -----------------------------------------------------------
+latexmk
+
+# --- the standard LaTeX stack ------------------------------------------------
+collection-latexrecommended
+collection-fontsrecommended
+
+# --- bibliography ------------------------------------------------------------
+biber
+biblatex
+natbib
+bibtex
+
+# --- maths and units ---------------------------------------------------------
+amsmath
+mathtools
+siunitx
+physics
+bm
+upgreek
+
+# --- floats, tables, captions ------------------------------------------------
+caption
+subcaption
+booktabs
+multirow
+threeparttable
+tabularray
+float
+wrapfig
+rotating
+adjustbox
+placeins
+
+# --- typography and layout ---------------------------------------------------
+geometry
+setspace
+lineno
+enumitem
+titlesec
+fancyhdr
+lastpage
+xurl
+soul
+ulem
+csquotes
+etoolbox
+xstring
+xpatch
+comment
+todonotes
+changes
+pdfpages
+pdflscape
+
+# --- cross-referencing -------------------------------------------------------
+cleveref
+orcidlink
+hyperref
+hyperxmp
+doi
+
+# --- algorithms --------------------------------------------------------------
+algorithms
+algorithmicx
+algorithm2e
+
+# --- fonts commonly demanded by journal classes ------------------------------
+psnfss
+newtx
+txfonts
+helvetic
+courier
+times
+mathptmx
+cm-super
+type1cm
+sansmath
+
+# --- journal document classes ------------------------------------------------
+revtex
+elsarticle
+ieeetran
+achemso
+acmart
+siamltex
+copernicus
+
+# --- graphics helpers --------------------------------------------------------
+pgf
+pgfplots
+standalone
+transparent
+epstopdf
+epstopdf-pkg

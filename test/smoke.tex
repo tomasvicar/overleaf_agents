@@ -1,0 +1,119 @@
+% Sample manuscript for CI: exercises the packages a real journal submission
+% tends to pull in. If this stops compiling, the image lost a package.
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{mathptmx}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{lineno}
+\usepackage{microtype}
+
+\usepackage{amsmath,amssymb,mathtools}
+\usepackage{siunitx}
+\usepackage{bm}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\usepackage{natbib}
+\usepackage[colorlinks=true]{hyperref}
+\usepackage{cleveref}
+\usepackage{orcidlink}
+
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+
+\doublespacing
+\linenumbers
+
+\title{Smoke test manuscript}
+\author{CI \orcidlink{0000-0002-1825-0097}}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Compiles a representative subset of a journal submission so that a missing
+TeX Live package fails the build here rather than in someone's paper.
+\end{abstract}
+
+\section{Maths}
+\label{sec:maths}
+
+Shear stress at the wall of a rectangular channel,
+\begin{equation}
+  \tau_w = \frac{6 \mu Q}{w h^{2}}, \qquad \mu = \SI{1.0e-3}{\pascal\second},
+  \label{eq:shear}
+\end{equation}
+with $\bm{v}$ the velocity field. \Cref{eq:shear} is referenced through
+\texttt{cleveref}, and \citet{knuth1984} through \texttt{natbib}.
+
+\section{Table and figure}
+
+\begin{table}[H]
+  \centering
+  \caption{A booktabs table.}
+  \label{tab:demo}
+  \begin{tabular}{lrr}
+    \toprule
+    Condition & \multicolumn{2}{c}{Adherent cells} \\
+    \cmidrule(lr){2-3}
+              & mean & SD \\
+    \midrule
+    Control   & 412  & 31 \\
+    Treated   & 188  & 24 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+  \centering
+  \begin{subfigure}{0.45\textwidth}
+    \centering
+    \begin{tikzpicture}
+      \begin{axis}[width=\textwidth, height=4cm, xlabel={$t$}, ylabel={$N$}]
+        \addplot coordinates {(0,100) (1,74) (2,55) (3,41)};
+      \end{axis}
+    \end{tikzpicture}
+    \caption{Decay.}
+    \label{fig:decay}
+  \end{subfigure}
+  \hfill
+  \begin{subfigure}{0.45\textwidth}
+    \centering
+    \rule{3cm}{2cm}
+    \caption{Placeholder.}
+    \label{fig:placeholder}
+  \end{subfigure}
+  \caption{Subfigures, referenced as \cref{fig:decay,fig:placeholder}.}
+\end{figure}
+
+\section{Algorithm}
+
+\begin{algorithm}[H]
+  \caption{Threshold sweep}
+  \begin{algorithmic}[1]
+    \State $best \gets -\infty$
+    \For{$\theta \in \Theta$}
+      \If{$f(\theta) > best$} \State $best \gets f(\theta)$ \EndIf
+    \EndFor
+    \State \Return $best$
+  \end{algorithmic}
+\end{algorithm}
+
+\bibliographystyle{plainnat}
+\bibliography{smoke}
+
+\end{document}

@@ -1,0 +1,82 @@
+#!/bin/bash
+# Entrypoint of the latex-overleaf image.
+#
+#   docker run --rm -v "$PWD:/work" IMAGE                 # compile main.tex
+#   docker run --rm -v "$PWD:/work" IMAGE paper.tex       # compile a named file
+#   docker run --rm -v "$PWD:/work" IMAGE bash            # drop into a shell
+#
+# Anything that resolves to an executable is run as-is, so `tlmgr`, `latexmk`
+# and `bash` all still work; everything else is treated as the manuscript.
+set -euo pipefail
+
+OUTDIR="${OUTDIR:-build}"
+ENGINE="${ENGINE:-pdflatex}"
+
+if [ "$#" -gt 0 ] && command -v -- "$1" >/dev/null 2>&1; then
+    exec "$@"
+fi
+
+# --- pick the manuscript ----------------------------------------------------
+if [ "$#" -gt 0 ]; then
+    TEXFILE="$1"
+elif [ -f main.tex ]; then
+    TEXFILE=main.tex
+else
+    mapfile -t candidates < <(grep -ls '\\documentclass' ./*.tex 2>/dev/null || true)
+    if [ "${#candidates[@]}" -eq 1 ]; then
+        TEXFILE="${candidates[0]}"
+    elif [ "${#candidates[@]}" -eq 0 ]; then
+        echo "compile-paper: no main.tex and no .tex file with \\documentclass in $(pwd)" >&2
+        echo "compile-paper: is the project directory mounted at /work?" >&2
+        exit 2
+    else
+        echo "compile-paper: several candidate main files; name one explicitly:" >&2
+        printf '  %s\n' "${candidates[@]}" >&2
+        exit 2
+    fi
+fi
+
+if [ ! -f "$TEXFILE" ]; then
+    echo "compile-paper: $TEXFILE not found in $(pwd)" >&2
+    exit 2
+fi
+
+case "$ENGINE" in
+    pdflatex) engine_flag=-pdf ;;
+    xelatex)  engine_flag=-pdfxe ;;
+    lualatex) engine_flag=-pdflua ;;
+    *) echo "compile-paper: unknown ENGINE=$ENGINE (use pdflatex|xelatex|lualatex)" >&2; exit 2 ;;
+esac
+
+latexmk_args=(
+    "$engine_flag"
+    -interaction=nonstopmode
+    -halt-on-error
+    -file-line-error
+    -outdir="$OUTDIR"
+)
+[ "${SHELL_ESCAPE:-0}" = "1" ] && latexmk_args+=(-shell-escape)
+
+# --- compile ----------------------------------------------------------------
+base="$(basename "${TEXFILE%.tex}")"
+status=0
+latexmk "${latexmk_args[@]}" "$TEXFILE" || status=$?
+
+if [ -f "$OUTDIR/$base.pdf" ]; then
+    cp -f "$OUTDIR/$base.pdf" "./$base.pdf"
+fi
+
+# Files are created as the container user (root, unless --user was passed).
+# Hand them back to whoever owns the mounted project directory.
+chown -R --reference=. "$OUTDIR" "./$base.pdf" 2>/dev/null || true
+
+if [ "$status" -ne 0 ]; then
+    echo >&2
+    echo "=== compile failed -- errors from $OUTDIR/$base.log ===" >&2
+    grep -E '^(.*:[0-9]+:|!|l\.[0-9]+)' "$OUTDIR/$base.log" 2>/dev/null | head -40 >&2 || true
+    echo >&2
+    echo "Full log: $OUTDIR/$base.log" >&2
+    exit "$status"
+fi
+
+echo "compile-paper: wrote ./$base.pdf"
