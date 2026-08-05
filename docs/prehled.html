@@ -1,0 +1,772 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>*{box-sizing:border-box}body{margin:0}</style>
+<style>
+  :root {
+    --paper:      #fcfcfd;
+    --surface:    #f2f4f7;
+    --ink:        #14181f;
+    --slate:      #5b6575;
+    --hairline:   #dfe3ea;
+    --accent:     #2f5fd0;
+    --accent-bg:  #eaf0fd;
+    --verified:   #1a7a4e;
+    --warn:       #9c530b;
+    --warn-bg:    #fbf2e6;
+
+    --serif: Georgia, "Iowan Old Style", "Source Serif Pro", ui-serif, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+    --measure: 68ch;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper:     #0f131a;
+      --surface:   #171d26;
+      --ink:       #e3e8f0;
+      --slate:     #97a2b3;
+      --hairline:  #29313d;
+      --accent:    #86a6f0;
+      --accent-bg: #182339;
+      --verified:  #5fc48d;
+      --warn:      #dda45c;
+      --warn-bg:   #2a2116;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --paper:     #0f131a;
+    --surface:   #171d26;
+    --ink:       #e3e8f0;
+    --slate:     #97a2b3;
+    --hairline:  #29313d;
+    --accent:    #86a6f0;
+    --accent-bg: #182339;
+    --verified:  #5fc48d;
+    --warn:      #dda45c;
+    --warn-bg:   #2a2116;
+  }
+
+  :root[data-theme="light"] {
+    --paper:     #fcfcfd;
+    --surface:   #f2f4f7;
+    --ink:       #14181f;
+    --slate:     #5b6575;
+    --hairline:  #dfe3ea;
+    --accent:    #2f5fd0;
+    --accent-bg: #eaf0fd;
+    --verified:  #1a7a4e;
+    --warn:      #9c530b;
+    --warn-bg:   #fbf2e6;
+  }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 17px;
+    line-height: 1.62;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 940px;
+    margin: 0 auto;
+    padding: clamp(2rem, 6vw, 4.5rem) clamp(1.1rem, 4vw, 2rem) 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 3.25rem;
+  }
+
+  /* ---------- masthead ---------- */
+
+  .masthead { display: flex; flex-direction: column; gap: 1.1rem; }
+
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+    color: var(--slate);
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 5.2vw, 3rem);
+    font-weight: 700;
+    line-height: 1.12;
+    letter-spacing: -0.015em;
+    text-wrap: balance;
+    margin: 0;
+  }
+
+  .standfirst {
+    max-width: var(--measure);
+    font-size: 1.14rem;
+    color: var(--slate);
+    margin: 0;
+  }
+
+  .facts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.55rem;
+    padding-top: 0.4rem;
+  }
+
+  .fact {
+    font-family: var(--mono);
+    font-size: 0.775rem;
+    font-variant-numeric: tabular-nums;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--hairline);
+    border-radius: 3px;
+    color: var(--slate);
+    background: var(--surface);
+  }
+
+  .fact b { color: var(--ink); font-weight: 600; }
+
+  .coords {
+    font-family: var(--sans);
+    font-size: 0.86rem;
+    color: var(--slate);
+    max-width: none;
+  }
+
+  .coords code { font-size: 0.82rem; }
+
+  /* ---------- sections ---------- */
+
+  section { display: flex; flex-direction: column; gap: 1.1rem; }
+
+  h2 {
+    font-family: var(--serif);
+    font-size: 1.55rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+    padding-bottom: 0.55rem;
+    border-bottom: 2px solid var(--ink);
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 650;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--slate);
+    margin: 0.5rem 0 0;
+  }
+
+  p { max-width: var(--measure); margin: 0; }
+
+  a { color: var(--accent); text-underline-offset: 2px; }
+  a:focus-visible,
+  code:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  strong { font-weight: 700; }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.86em;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-radius: 3px;
+    padding: 0.08em 0.32em;
+  }
+
+  pre {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    line-height: 1.65;
+    background: var(--surface);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--accent);
+    border-radius: 3px;
+    padding: 0.95rem 1.1rem;
+    overflow-x: auto;
+    margin: 0;
+  }
+
+  pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  pre .cmt { color: var(--slate); }
+
+  /* ---------- file table ---------- */
+
+  .tablewrap { overflow-x: auto; }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    min-width: 33rem;
+    font-size: 0.94rem;
+  }
+
+  th {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--slate);
+    text-align: left;
+    padding: 0 0.9rem 0.5rem 0;
+    border-bottom: 1px solid var(--ink);
+  }
+
+  td {
+    vertical-align: top;
+    padding: 0.72rem 0.9rem 0.72rem 0;
+    border-bottom: 1px solid var(--hairline);
+  }
+
+  td:first-child { white-space: nowrap; width: 1%; }
+
+  td:first-child code {
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--accent);
+    font-size: 0.83rem;
+  }
+
+  /* ---------- verified list ---------- */
+
+  .checks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr));
+    gap: 0.1rem 2rem;
+  }
+
+  .checks li {
+    position: relative;
+    padding: 0.5rem 0 0.5rem 1.55rem;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 0.95rem;
+  }
+
+  .checks li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    color: var(--verified);
+    font-family: var(--sans);
+    font-weight: 700;
+  }
+
+  /* ---------- callouts ---------- */
+
+  .trap {
+    background: var(--warn-bg);
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--warn);
+    border-radius: 3px;
+    padding: 1rem 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  .trap .label {
+    font-family: var(--sans);
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.11em;
+    text-transform: uppercase;
+    color: var(--warn);
+  }
+
+  .trap p { max-width: none; }
+
+  /* ---------- todo list ---------- */
+
+  .todo {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    counter-reset: todo;
+  }
+
+  .todo li {
+    position: relative;
+    padding-left: 2.5rem;
+    max-width: var(--measure);
+  }
+
+  .todo li::before {
+    counter-increment: todo;
+    content: counter(todo);
+    position: absolute;
+    left: 0;
+    top: 0.28rem;
+    width: 1.7rem;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border-radius: 3px;
+    padding: 0.1rem 0;
+    text-align: center;
+  }
+
+  /* ---------- figures ---------- */
+
+  figure {
+    margin: 0.4rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .figbox { overflow-x: auto; }
+
+  figure svg {
+    display: block;
+    width: 100%;
+    min-width: 30rem;
+    max-width: 100%;
+    height: auto;
+    color: var(--ink);
+  }
+
+  figcaption {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--slate);
+    max-width: var(--measure);
+  }
+
+  .svg-fill    { fill: var(--surface); }
+  .svg-stroke  { stroke: var(--hairline); }
+  .svg-label   { font-family: var(--sans); font-size: 13px; font-weight: 600; fill: var(--ink); }
+  .svg-sub     { font-family: var(--mono); font-size: 11px; fill: var(--slate); }
+  .svg-edge    { font-family: var(--sans); font-size: 11px; fill: var(--slate); }
+  .svg-accent  { stroke: var(--accent); }
+  .svg-accent-t{ font-family: var(--sans); font-size: 11.5px; font-weight: 600; fill: var(--accent); }
+  .svg-warn    { stroke: var(--warn); }
+  .svg-warn-t  { font-family: var(--sans); font-size: 11px; fill: var(--warn); }
+  .svg-head    { fill: currentColor; }
+  .svg-head-a  { fill: var(--accent); }
+  .svg-head-w  { fill: var(--warn); }
+
+  /* ---------- footer ---------- */
+
+  .footer {
+    border-top: 1px solid var(--hairline);
+    padding-top: 1.4rem;
+    font-family: var(--sans);
+    font-size: 0.84rem;
+    color: var(--slate);
+    max-width: var(--measure);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+<title>overleaf_agents — jak je to postavené</title>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="masthead">
+    <div class="eyebrow">Přehled hotové práce</div>
+    <h1>overleaf_agents</h1>
+    <p class="standfirst">
+      Předbuilděný kontejner, který přeloží manuskript z Overleafu jedním příkazem — a dokumentace,
+      která agentovi řekne, jak ho použít. V paper repu nepřibude žádný script, devcontainer ani
+      konfigurační soubor.
+    </p>
+    <p class="coords">
+      <a href="https://github.com/tomasvicar/overleaf_agents">github.com/tomasvicar/overleaf_agents</a>
+      &nbsp;·&nbsp; <code>ghcr.io/tomasvicar/latex-overleaf:latest</code>
+    </p>
+    <div class="facts">
+      <span class="fact"><b>549 MB</b> rozbaleně</span>
+      <span class="fact"><b>260 MB</b> přes síť</span>
+      <span class="fact">TeX Live <b>2025</b></span>
+      <span class="fact">amd64 + arm64</span>
+      <span class="fact">stav: <b>publikováno</b> na GHCR</span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Princip</h2>
+    <p>
+      Overleaf běží na konkrétním releasu TeX Live — je vidět v projektu pod
+      <em>Menu → Settings → TeX Live version</em>. Image se instaluje ze <strong>zamrzlého
+      („historic") repozitáře téhož roku</strong>, takže věta „zkompilovalo se to lokálně" něco
+      vypovídá o tom, jestli to projde i na Overleafu.
+    </p>
+    <p>
+      Tahle parita je důvod, proč se neřeší kompilace přímo na Overleafu. Overleaf nemá veřejné
+      compile API; cesty přes neoficiální endpoint nebo headless browser jsou křehké a šly by přidat
+      později, ale pro to, co potřebuješ, nejsou nutné.
+    </p>
+    <p>
+      Image je záměrně malý: <code>scheme-basic</code> plus kurátorovaný seznam balíčků. To je
+      jediné místo, kde se od Overleafu liší — ten jede TeX Live <em>full</em>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Jak vzniká image</h2>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 900 250" role="img"
+             aria-label="Pipeline: zdrojové soubory jdou do Dockerfilu, CI staví amd64 image, spustí smoke test, a teprve když projde, pushne multi-arch image na GHCR.">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path class="svg-head" d="M 0 0 L 10 5 L 0 10 z"/>
+            </marker>
+            <marker id="ar-warn" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path class="svg-head-w" d="M 0 0 L 10 5 L 0 10 z"/>
+            </marker>
+          </defs>
+
+          <!-- sources -->
+          <rect class="svg-fill svg-stroke" x="8"  y="20" width="176" height="34" rx="3"/>
+          <rect class="svg-fill svg-stroke" x="8"  y="62" width="176" height="34" rx="3"/>
+          <rect class="svg-fill svg-stroke" x="8"  y="104" width="176" height="34" rx="3"/>
+          <text class="svg-sub" x="20" y="42">texlive.profile</text>
+          <text class="svg-sub" x="20" y="84">packages.txt</text>
+          <text class="svg-sub" x="20" y="126">compile-paper</text>
+
+          <line x1="190" y1="79" x2="228" y2="79" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+
+          <!-- dockerfile -->
+          <rect class="svg-fill svg-stroke" x="234" y="52" width="132" height="54" rx="3"/>
+          <text class="svg-label" x="300" y="76" text-anchor="middle">Dockerfile</text>
+          <text class="svg-sub"   x="300" y="93" text-anchor="middle">2 vrstvy</text>
+
+          <line x1="372" y1="79" x2="410" y2="79" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <text class="svg-edge" x="391" y="70" text-anchor="middle">build</text>
+
+          <!-- amd64 build -->
+          <rect class="svg-fill svg-stroke" x="416" y="52" width="112" height="54" rx="3"/>
+          <text class="svg-label" x="472" y="76" text-anchor="middle">image</text>
+          <text class="svg-sub"   x="472" y="93" text-anchor="middle">amd64</text>
+
+          <line x1="534" y1="79" x2="572" y2="79" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+
+          <!-- smoke gate -->
+          <rect class="svg-fill svg-accent" x="578" y="46" width="132" height="66" rx="3" stroke-width="1.5"/>
+          <text class="svg-label" x="644" y="72" text-anchor="middle">smoke test</text>
+          <text class="svg-sub"   x="644" y="90" text-anchor="middle">test/smoke.tex</text>
+
+          <line x1="716" y1="79" x2="754" y2="79" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
+          <text class="svg-accent-t" x="735" y="70" text-anchor="middle">projde</text>
+
+          <!-- registry -->
+          <rect class="svg-fill svg-stroke" x="760" y="46" width="132" height="66" rx="3"/>
+          <text class="svg-label" x="826" y="72" text-anchor="middle">GHCR</text>
+          <text class="svg-sub"   x="826" y="90" text-anchor="middle">:TL2025 :latest</text>
+          <text class="svg-sub"   x="826" y="126" text-anchor="middle">amd64 + arm64</text>
+
+          <!-- fail branch -->
+          <line x1="644" y1="118" x2="644" y2="150" class="svg-warn" stroke-width="1.5"
+                stroke-dasharray="5 4" marker-end="url(#ar-warn)"/>
+          <text class="svg-warn-t" x="644" y="176" text-anchor="middle">spadne → nic se nepublikuje</text>
+
+          <!-- verify note -->
+          <line x1="300" y1="112" x2="300" y2="150" class="svg-accent" stroke-width="1.5" marker-end="url(#ar)"/>
+          <text class="svg-accent-t" x="300" y="176" text-anchor="middle">každý balíček se po instalaci ověří</text>
+          <text class="svg-edge" x="300" y="196" text-anchor="middle">tlmgr info --only-installed</text>
+        </svg>
+      </div>
+      <figcaption>
+        Publikace je podmíněná smoke testem: CI nejdřív postaví jen amd64, přeloží jím ukázkový
+        manuskript, a teprve pak staví a pushuje multi-arch. Rozdělení Dockerfilu na dvě vrstvy
+        znamená, že editace <code>packages.txt</code> nestahuje celý TeX Live znovu.
+      </figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <h2>Jak se image používá</h2>
+
+    <figure>
+      <div class="figbox">
+        <svg viewBox="0 0 900 300" role="img"
+             aria-label="Lokální klon sedí mezi Overleafem a volitelným GitHub remote; kompiluje se image z GHCR, který je pinnutý na stejný TeX Live release, jaký běží na Overleafu.">
+          <defs>
+            <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path class="svg-head" d="M 0 0 L 10 5 L 0 10 z"/>
+            </marker>
+            <marker id="ar2-acc" viewBox="0 0 10 10" refX="9" refY="5"
+                    markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path class="svg-head-a" d="M 0 0 L 10 5 L 0 10 z"/>
+            </marker>
+          </defs>
+
+          <!-- overleaf -->
+          <rect class="svg-fill svg-stroke" x="20" y="30" width="190" height="72" rx="3"/>
+          <text class="svg-label" x="115" y="58" text-anchor="middle">Overleaf projekt</text>
+          <text class="svg-sub"   x="115" y="78" text-anchor="middle">TeX Live 2025</text>
+
+          <!-- local clone -->
+          <rect class="svg-fill svg-stroke" x="355" y="30" width="190" height="72" rx="3"/>
+          <text class="svg-label" x="450" y="58" text-anchor="middle">lokální klon</text>
+          <text class="svg-sub"   x="450" y="78" text-anchor="middle">main.tex → main.pdf</text>
+
+          <!-- github -->
+          <rect class="svg-fill svg-stroke" x="690" y="30" width="190" height="72" rx="3"
+                stroke-dasharray="5 4"/>
+          <text class="svg-label" x="785" y="58" text-anchor="middle">GitHub</text>
+          <text class="svg-sub"   x="785" y="78" text-anchor="middle">origin — volitelný</text>
+
+          <!-- edges top row -->
+          <line x1="216" y1="66" x2="349" y2="66" stroke="currentColor" stroke-width="1.5"
+                marker-start="url(#ar2)" marker-end="url(#ar2)"/>
+          <text class="svg-edge" x="282" y="52" text-anchor="middle">git pull / push</text>
+          <text class="svg-edge" x="282" y="86" text-anchor="middle">nikdy --force</text>
+
+          <line x1="551" y1="66" x2="684" y2="66" stroke="currentColor" stroke-width="1.5"
+                stroke-dasharray="5 4" marker-start="url(#ar2)" marker-end="url(#ar2)"/>
+          <text class="svg-edge" x="617" y="52" text-anchor="middle">git pull / push</text>
+
+          <!-- image box -->
+          <rect class="svg-fill svg-accent" x="355" y="196" width="190" height="72" rx="3" stroke-width="1.5"/>
+          <text class="svg-label" x="450" y="224" text-anchor="middle">image :TL2025</text>
+          <text class="svg-sub"   x="450" y="244" text-anchor="middle">ghcr.io</text>
+
+          <line x1="450" y1="190" x2="450" y2="108" class="svg-accent" stroke-width="1.5" marker-end="url(#ar2-acc)"/>
+          <text class="svg-accent-t" x="462" y="152">docker run -v $PWD:/work</text>
+
+          <!-- parity link -->
+          <path d="M 115 108 L 115 232 L 349 232" class="svg-accent" fill="none"
+                stroke-width="1.5" stroke-dasharray="5 4" marker-end="url(#ar2-acc)"/>
+          <text class="svg-accent-t" x="132" y="224">stejný TeX Live release = parita</text>
+        </svg>
+      </div>
+      <figcaption>
+        Modrá přerušovaná čára je celý vtip návrhu: image je pinnutý na tentýž TeX Live release,
+        jaký má nastavený Overleaf projekt. Proto lokální překlad vypovídá o tom, co udělá
+        Overleaf, a není potřeba nic kompilovat vzdáleně. GitHub remote je čárkovaný proto, že
+        je volitelný — Overleaf sám o sobě je platný setup.
+      </figcaption>
+    </figure>
+
+    <h3>Jednou za paper</h3>
+    <pre><code><span class="cmt"># token: Overleaf → Account Settings → Git Integration (placená funkce)</span>
+git clone https://git@git.overleaf.com/&lt;PROJECT_ID&gt; my-paper
+git remote rename origin overleaf
+
+<span class="cmt"># GitHub je volitelný — Overleaf sám o sobě je platný setup</span>
+git remote add origin git@github.com:&lt;you&gt;/&lt;repo&gt;.git</code></pre>
+
+    <h3>Pak už jen tohle</h3>
+    <pre><code>docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:latest
+
+git add -A &amp;&amp; git commit -m "…"
+git push overleaf main
+git remote | grep -q '^origin$' &amp;&amp; git push origin main</code></pre>
+
+    <p>
+      Overleaf remote se vždycky jmenuje <code>overleaf</code>, i když je jediný. Bez toho by se
+      jmenoval <code>origin</code> v jednom setupu a <code>overleaf</code> v druhém a každá
+      instrukce by musela existovat ve dvou verzích — takhle platí jedno pravidlo v obou
+      případech, agenta nevyjímaje.
+    </p>
+    <p>
+      Rootless podman se chová opačně — root v kontejneru už je mapovaný na tebe, takže
+      <code>-u</code> se <strong>vynechá</strong>, a na Fedoře se k mountu přidá <code>:Z</code>
+      kvůli SELinuxu. Obě varianty jsem prohnal reálným během a soubory vyšly správně vlastněné.
+    </p>
+    <p>
+      Přes <code>-e</code> jde přepnout <code>ENGINE=xelatex|lualatex</code>,
+      <code>SHELL_ESCAPE=1</code> a <code>OUTDIR</code>. Jiný hlavní soubor se předá jako argument
+      za jménem image.
+    </p>
+  </section>
+
+  <section>
+    <h2>Co je v repu</h2>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Soubor</th><th>Role</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>Dockerfile</code></td>
+            <td>Dvoufázový build. Installer stáhne <code>install-tl</code> ze zamrzlého
+                <code>tlnet-final/2025</code>; runtime je debian-slim se zkopírovaným TeX Live
+                stromem bez dokumentace a zdrojáků.</td>
+          </tr>
+          <tr>
+            <td><code>packages.txt</code></td>
+            <td>Zhruba 60 balíčků nad <code>scheme-basic</code>. Jediné místo, kde se rozšiřuje
+                pokrytí. Každá položka se po instalaci ověřuje zvlášť.</td>
+          </tr>
+          <tr>
+            <td><code>texlive.profile</code></td>
+            <td>Profil pro <code>install-tl</code>: scheme-basic bez docfiles a srcfiles — odtud
+                pramení ta velikost.</td>
+          </tr>
+          <tr>
+            <td><code>compile-paper</code></td>
+            <td>Entrypoint. Najde hlavní soubor, pustí latexmk do <code>build/</code>, zkopíruje PDF
+                do rootu a přepíše vlastnictví výstupů podle vlastníka mountu. Při chybě vypíše
+                relevantní řádky logu.</td>
+          </tr>
+          <tr>
+            <td><code>test/smoke.tex</code></td>
+            <td>Regresní test — realistický manuskript. Když přestane jít přeložit, image přišel
+                o balíček.</td>
+          </tr>
+          <tr>
+            <td><code>.github/workflows/<wbr>image.yml</code></td>
+            <td>Build amd64 → smoke test → push multi-arch na GHCR. Měsíční cron kvůli Debian
+                security updatům.</td>
+          </tr>
+          <tr>
+            <td><code>README.md</code></td>
+            <td>Pro člověka: token → clone → jeden příkaz.</td>
+          </tr>
+          <tr>
+            <td><code>AGENTS.snippet.md</code></td>
+            <td>K nakopírování do paper repa jako <code>AGENTS.md</code> <em>a</em>
+                <code>CLAUDE.md</code>. Tohle je celá integrace agenta.</td>
+          </tr>
+          <tr>
+            <td><code>skills/overleaf-paper/</code></td>
+            <td>Volitelná <code>/slash</code> zkratka pro Claude Code nad týmiž příkazy.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Proč ne MCP server</h2>
+    <p>
+      Ptal ses, jestli to řešit přes skill nebo MCP server. MCP dává agentovi schopnosti, které
+      jinak nemá — tady je ale všechno <code>docker run</code> a <code>git</code>, což agent umí
+      přes shell. MCP server by přidal proces, závislost a konfiguraci navíc za nulový zisk.
+    </p>
+    <p>
+      Nosičem je proto obyčejný markdown v paper repu, pod dvěma jmény:
+      <code>AGENTS.md</code> pro Codex, Gemini CLI a většinu ostatních, <code>CLAUDE.md</code> pro
+      Claude Code. Symlink jednoho na druhý je udrží v souladu — na Windows bez developer mode
+      se soubor prostě zkopíruje dvakrát. Skill je nad tím jen tenká vrstva pro pohodlí. Pravidla, která agent dostává: kompiluj
+      v kontejneru a ne na hostu, čti <em>první</em> chybu z logu, chybějící <code>.sty</code>
+      znamená chybějící balíček v image a <strong>ne</strong> důvod přepisovat manuskript, před
+      pushem na Overleaf vždycky zkompiluj, nikdy neforcuj a při odmítnutém pushi
+      <code>git pull --no-rebase</code>.
+    </p>
+  </section>
+
+  <section>
+    <h2>Co je ověřené reálným během</h2>
+    <ul class="checks">
+      <li>Build projde; 549 MB rozbaleně, 260 MB přes síť</li>
+      <li>GitHub Actions: build i smoke test na čistém runneru, 22 min</li>
+      <li>Image na GHCR jde stáhnout <strong>bez tokenu</strong></li>
+      <li>Manifest obsahuje amd64 i arm64</li>
+      <li>Staženým image přeložený manuskript: PDF na bajt stejné jako lokálně</li>
+      <li>Smoke test dá dvoustránkové PDF</li>
+      <li>siunitx, cleveref, subcaption, natbib + bibtex, pgfplots, algorithmicx</li>
+      <li>Autodetekce hlavního souboru podle <code>\documentclass</code></li>
+      <li>Chybová cesta vypíše první chybu a vrátí nenulový kód</li>
+      <li>Docker s <code>-u</code>: výstupy vlastní správný uživatel</li>
+      <li>Rootless podman bez <code>-u</code>, s <code>:Z</code>: totéž</li>
+      <li>Escape hatch <code>bash</code> / <code>tlmgr</code> funguje</li>
+      <li>pdfTeX 1.40.28 (TL2025), latexmk 4.87, biber 2.21</li>
+      <li>Rozšíření image o balíček navíc projde</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Dvě pasti, které testování odhalilo</h2>
+    <p>
+      Obě změnily návrh oproti tomu, co jsem původně napsal — proto stojí za zaznamenání.
+    </p>
+
+    <div class="trap">
+      <div class="label">tlmgr lže o úspěchu</div>
+      <p>
+        <code>tlmgr install</code> vypíše <code>install: foo [9k]</code> a skončí s
+        <strong>exit 0, i když se nestáhlo vůbec nic</strong>. Spolehnout se na návratový kód by
+        znamenalo tiše vydávat rozbité image.
+      </p>
+      <p>
+        Proto Dockerfile po instalaci prochází <code>packages.txt</code> položku po položce přes
+        <code>tlmgr info --only-installed</code> a vypíše všechna vadná jména najednou. A proto je
+        v dokumentovaném rozšiřovacím Dockerfilu <code>&amp;&amp; kpsewhich</code> — je to jediné,
+        co z tichého selhání udělá selhaný build.
+      </p>
+    </div>
+
+    <div class="trap">
+      <div class="label">runtime stage neměl čím stahovat</div>
+      <p>
+        V runtime vrstvě chyběl <code>curl</code> i <code>wget</code> — byly jen v installer stage.
+        <code>tlmgr</code> tak neměl jak stáhnout balíček a v kombinaci s pastí výše to vypadalo
+        jako zablokovaná síť. Doplněný <code>curl</code> a <code>ca-certificates</code> to řeší.
+      </p>
+      <p>
+        Kvůli tomu jsem taky vyhodil původně dokumentovaný <code>tlmgr --usermode</code> do
+        persistentního volume — do namountovaného stromu nezapisoval. Nahradil ho dvouřádkový
+        Dockerfile nad publikovaným image, který používá systémový strom a je cachovatelný.
+      </p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Co zbývá tobě</h2>
+    <ol class="todo">
+      <li>
+        Nakopírovat <code>AGENTS.snippet.md</code> do paper repa jako <code>AGENTS.md</code>
+        a <code>CLAUDE.md</code> (symlink stačí) a přidat <code>build/</code> a aux přípony do
+        <code>.gitignore</code>. Tím je paper repo hotový — nic dalšího do něj nepřibude.
+      </li>
+      <li>
+        Zkontrolovat TeX Live rok v Overleaf projektu a srovnat ho s image. Když se rozejdou,
+        parita — na které celý návrh stojí — přestane platit. Mění se na třech místech:
+        <code>DEFAULT_TL_YEAR</code> a matrix ve workflow, <code>TL_YEAR</code> v Dockerfilu.
+      </li>
+      <li>
+        Počítat s tím, že <code>paper_adherence</code> s <code>biophys-new.cls</code> nejspíš na
+        první pokus vyžádá nějaký balíček navíc do <code>packages.txt</code>.
+      </li>
+    </ol>
+  </section>
+
+  <div class="footer">
+    Zamrzlé („historic") repozitáře TeX Live jsou důvod, proč staré tagy budou fungovat i za rok:
+    <code>:TL2024</code> se instaluje z archivu, který se už nemění.
+  </div>
+
+</div>
+</body>
+</html>

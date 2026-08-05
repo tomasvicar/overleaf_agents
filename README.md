@@ -165,14 +165,9 @@ If `overleaf` is your only remote, drop the last line; nothing else changes.
 
 ## Missing packages
 
-Two options, in order of preference.
-
-**Add it to the image** (permanent, helps everyone): add the package name to
-[`packages.txt`](packages.txt) and open a PR. CI rebuilds the image, runs the
-smoke-test compile and pushes new `amd64` + `arm64` tags.
-
-**Extend the image locally** (immediate, no waiting for CI): a two-line
-Dockerfile on top of the published one.
+A missing `.sty` is not a problem with your manuscript — do not rewrite the
+LaTeX to avoid the package. To get unstuck immediately, extend the image with a
+two-line Dockerfile:
 
 ```bash
 docker build -t latex-overleaf:local - <<'EOF'
@@ -187,9 +182,15 @@ exits 0 even when the download failed**, so without it a broken build looks
 like a successful one. The same trap is why the image build verifies every
 entry in `packages.txt` afterwards instead of trusting `tlmgr`'s exit code.
 
-To find out which package provides a missing `foo.sty`, search
-<https://ctan.org/pkg/foo> or run `tlmgr search --global --file foo.sty` inside
-the container.
+**[docs/adding-packages.md](docs/adding-packages.md)** has the rest: how to find
+which package provides a given `.sty`, and how to fork this repo so CI builds
+and publishes an image with your package in it — a real tag your co-authors can
+pull, rather than something that exists only on your machine.
+
+If you would rather never deal with a missing package again, and you are not on
+an Apple Silicon Mac, **[docs/using-upstream-texlive.md](docs/using-upstream-texlive.md)**
+describes using the upstream full TeX Live image instead of this one, and what
+that trades away.
 
 ---
 
@@ -200,10 +201,17 @@ Agents do not need an MCP server or a custom tool for any of the above — it is
 What they need is for the commands to be written down in the repository they are
 working in.
 
-Copy [`AGENTS.snippet.md`](AGENTS.snippet.md) into your paper repo's
-`AGENTS.md` (Claude Code, Codex and Gemini CLI all read it; Claude Code also
-reads `CLAUDE.md`, which can simply be a symlink). That is the whole
-integration.
+Copy [`AGENTS.snippet.md`](AGENTS.snippet.md) into your paper repo under **both**
+names — `AGENTS.md` for Codex, Gemini CLI and most other agents, `CLAUDE.md` for
+Claude Code:
+
+```bash
+cp AGENTS.snippet.md /path/to/paper/AGENTS.md
+ln -s AGENTS.md /path/to/paper/CLAUDE.md      # or just copy it twice
+```
+
+A symlink keeps the two from drifting apart. On Windows without developer mode,
+copy the file instead and remember to edit both. That is the whole integration.
 
 If you want a `/paper` slash command in Claude Code on top of that, copy
 [`skills/overleaf-paper/SKILL.md`](skills/overleaf-paper/SKILL.md) into
@@ -223,6 +231,9 @@ test/smoke.tex                 representative manuscript compiled by CI
 .github/workflows/image.yml    build, smoke test, push multi-arch to GHCR
 AGENTS.snippet.md              paste-into-your-paper-repo instructions for agents
 skills/overleaf-paper/         optional Claude Code slash command
+docs/adding-packages.md        adding a package, and forking to publish your own image
+docs/using-upstream-texlive.md the upstream full TeX Live image as an alternative
+docs/prehled.html              illustrated overview of the whole design (Czech)
 ```
 
 ## Bumping the TeX Live version

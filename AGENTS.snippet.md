@@ -1,9 +1,14 @@
 <!--
-Copy the section below into your paper repository's AGENTS.md.
-Replace <PROJECT_ID> and delete anything that does not apply.
+Copy the section below into your paper repository under BOTH names, so it works
+whichever agent someone reaches for:
 
-Claude Code reads CLAUDE.md; Codex and Gemini CLI read AGENTS.md. Keep one file
-and symlink the other:  ln -s AGENTS.md CLAUDE.md
+    cp AGENTS.snippet.md /path/to/paper/AGENTS.md   # Codex, Gemini CLI, others
+    ln -s AGENTS.md /path/to/paper/CLAUDE.md        # Claude Code
+
+The symlink keeps the two from drifting apart. On Windows without developer
+mode, copy the file twice and remember to edit both.
+
+Replace <PROJECT_ID> and delete anything that does not apply.
 -->
 
 ## Building the paper
