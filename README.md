@@ -25,7 +25,9 @@ TeX Live's frozen *historic* repository, so "it compiles locally" is a
 meaningful statement about whether it will compile on Overleaf.
 
 The image is deliberately small — `scheme-basic` plus the package list in
-[`packages.txt`](packages.txt) — so it pulls in seconds rather than minutes.
+[`packages.txt`](packages.txt) — which puts it at 549 MB unpacked, about 260 MB
+over the wire, against roughly 2.6 GB for a full TeX Live image. It is also
+built for `arm64` as well as `amd64`, which `texlive/texlive` is not.
 That is the one place where it differs from Overleaf, which ships TeX Live
 *full*. If your paper needs a package that is not in the list, see
 [Missing packages](#missing-packages) below; it is a two-minute fix and it only
