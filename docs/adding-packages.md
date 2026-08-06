@@ -20,7 +20,7 @@ TeX Live package names rarely match the `.sty` name, so look it up rather than
 guess. The image can answer this itself:
 
 ```bash
-docker run --rm ghcr.io/tomasvicar/latex-overleaf:latest \
+docker run --rm ghcr.io/tomasvicar/latex-overleaf:TL2025 \
   tlmgr search --global --file foo.sty
 ```
 
@@ -46,7 +46,7 @@ One minute, no GitHub involved. Good for getting unstuck right now.
 
 ```bash
 docker build -t latex-overleaf:local - <<'EOF'
-FROM ghcr.io/tomasvicar/latex-overleaf:latest
+FROM ghcr.io/tomasvicar/latex-overleaf:TL2025
 RUN tlmgr install datetime2 && kpsewhich datetime2.sty
 EOF
 ```
@@ -137,7 +137,7 @@ image will need a token to pull.
 
 ```bash
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/<your-user>/latex-overleaf:latest
+  ghcr.io/<your-user>/latex-overleaf:TL2025
 ```
 
 Update the `docker run` line in your paper repo's `AGENTS.md` and `CLAUDE.md` to

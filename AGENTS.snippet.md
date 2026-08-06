@@ -11,7 +11,9 @@ for Windows defaults to core.symlinks=false and checks a committed symlink out
 as a text file containing the string "AGENTS.md". In Git Bash, `ln -s` does not
 even warn you: it exits 0 and silently makes a copy.
 
-Replace <PROJECT_ID> and delete anything that does not apply.
+Replace <PROJECT_ID> and delete anything that does not apply. Check the tag
+too: TL2025 must match Menu -> Settings -> TeX Live version in the Overleaf
+project, or the local compile stops predicting the Overleaf one.
 -->
 
 These instructions come from <https://github.com/tomasvicar/overleaf_agents>.
@@ -25,12 +27,14 @@ Compile in the pinned container — do not install TeX Live and do not try to ru
 
 ```bash
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest
+  ghcr.io/tomasvicar/latex-overleaf:TL2025
 ```
 
 - Produces `main.pdf` in the repo root; aux files go to `build/` (gitignored).
-- The image is pinned to the same TeX Live release as the Overleaf project, so a
-  successful local compile means it compiles on Overleaf too.
+- The `TL2025` tag pins the image to the same TeX Live release as the Overleaf
+  project, so a successful local compile means it compiles on Overleaf too. Use
+  that tag, not `:latest` — `:latest` moves to a new TeX Live year when the
+  upstream repo does.
 - On failure the container prints the relevant error lines; the full log is
   `build/main.log`. Read the **first** error — later ones are usually fallout.
 - Never commit `main.pdf` fixes by hand. Fix the `.tex` and rebuild.
@@ -42,7 +46,7 @@ extend the image:
 
 ```bash
 docker build -t latex-overleaf:local - <<'EOF'
-FROM ghcr.io/tomasvicar/latex-overleaf:latest
+FROM ghcr.io/tomasvicar/latex-overleaf:TL2025
 RUN tlmgr install PACKAGE && kpsewhich PACKAGE.sty
 EOF
 ```
@@ -98,9 +102,9 @@ describing it in prose:
 ```bash
 git show <rev>:main.tex > old.tex
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest latexdiff old.tex main.tex > diff.tex
+  ghcr.io/tomasvicar/latex-overleaf:TL2025 latexdiff old.tex main.tex > diff.tex
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest diff.tex
+  ghcr.io/tomasvicar/latex-overleaf:TL2025 diff.tex
 ```
 
 Delete `old.tex`, `diff.tex` and `diff.pdf` afterwards — they are not part of

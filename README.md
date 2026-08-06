@@ -7,7 +7,7 @@ push it to Overleaf where your co-authors see it.
 
 ```bash
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest
+  ghcr.io/tomasvicar/latex-overleaf:TL2025
 ```
 
 - Compiles `main.tex` into `main.pdf`; aux files land in `build/`.
@@ -15,7 +15,8 @@ docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
   wrapper script, no extension. Just `git`, `docker`, and the line above.
 - Pinned to the TeX Live release Overleaf runs (**Menu → Settings → TeX Live
   version**) via TeX Live's frozen *historic* repository, so a clean local
-  compile means something about whether it compiles on Overleaf.
+  compile means something about whether it compiles on Overleaf. Pin it in your
+  own repo with the year tag — `:TL2025` — not `:latest`.
 - `scheme-basic` + [`packages.txt`](packages.txt): 647 MB unpacked, ~300 MB over
   the wire, against 2.6 GB for full TeX Live — and built for `arm64` too.
 
@@ -26,7 +27,8 @@ docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
 Set-up is a one-off: install Docker (**0**), clone your Overleaf project (**1**),
 let an agent fill in the rest (**2**). Step **3** is optional. Fifteen minutes,
 most of it downloads. After that you are in
-[Everyday commands](#everyday-commands).
+[Everyday commands](#everyday-commands) — and if a step does not go as written,
+[When something fails](#when-something-fails).
 
 ### 0) Prerequisites
 
@@ -49,37 +51,31 @@ machine, an Overleaf extension, or anything installed into the paper itself.
   ```
 
   Start Docker Desktop from the Start menu once and leave it running — the whale
-  in the tray. Then work in one of two shells:
+  in the tray. Then pick the shell you will do the work in:
 
-  1. **Ubuntu (WSL2)** — recommended. Every command in this repo runs exactly as
-     written, `$(id -u)` included. Tick *Docker Desktop → Settings → Resources →
-     WSL integration* for Ubuntu, then in the Ubuntu shell (Start → Ubuntu, or
-     `wsl` in any terminal):
+  **A. Ubuntu (WSL2)** — recommended. Every command in this repo runs exactly as
+  written, `$(id -u)` included. Tick *Docker Desktop → Settings → Resources → WSL
+  integration* for Ubuntu, open the Ubuntu shell (Start → Ubuntu, or `wsl` in any
+  terminal), install git there with `sudo apt update && sudo apt install -y git`,
+  and keep the paper under `~/` rather than `/mnt/c` — across that boundary
+  compiles are ~2.5× slower.
 
-     ```bash
-     sudo apt update && sudo apt install -y git
-     docker run --rm hello-world
-     ```
+  **B. PowerShell** — no Ubuntu needed (Docker runs in its own `docker-desktop`
+  distribution, so `wsl --install --no-distribution` is enough) and no
+  integration toggle. Install git with `winget install -e --id Git.Git`. Every
+  compile line in this repo then needs `-u` dropped and the mount written
+  `"${PWD}:/work"`, like this — later, once you have a paper to compile:
 
-     Keep the paper under `~/`, not `/mnt/c` — across that boundary compiles are
-     ~2.5× slower.
-  2. **PowerShell** — no Ubuntu needed (Docker runs in its own `docker-desktop`
-     distribution, so `wsl --install --no-distribution` is enough), and no
-     integration toggle. Install git, and drop `-u` from every compile line in
-     this repo, with the mount written `"${PWD}:/work"`:
-
-     ```powershell
-     winget install -e --id Git.Git
-     docker run --rm hello-world
-     docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:latest
-     ```
+  ```powershell
+  docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:TL2025
+  ```
 
   Docker's own install page:
   <https://docs.docker.com/desktop/setup/install/windows-install/>; Microsoft on
   WSL: <https://learn.microsoft.com/windows/wsl/install>.
 
-Check both are there before going on; the second line should print a hello
-message and exit:
+Then, in whichever shell you settled on, check both tools answer. The second
+line prints a hello message and exits:
 
 ```bash
 git --version
@@ -109,7 +105,13 @@ git remote rename origin overleaf
 
 The Overleaf side is now the remote called `overleaf` — that name is what every
 instruction in this repo, and every instruction an agent gets, is written
-against. `ls main.tex` should show your manuscript.
+against. `ls` should show your manuscript; the main file is usually `main.tex`,
+and if yours is called something else, note the name — the compile takes it as
+an argument.
+
+Putting the token in the URL writes it to `.git/config` in the clear. It is a
+revocable token rather than a password, but you can leave it out and let git
+prompt instead.
 
 Detail: **[docs/pairing.md](docs/pairing.md)** — keeping the token off disk,
 older projects on `master`, attaching to a directory that already has files.
@@ -123,9 +125,9 @@ and give it one line:
 > <https://github.com/tomasvicar/overleaf_agents>, then compile the paper.
 
 - It reads this repo for the rest: which files to copy in, which image to pull.
-- What it should end up doing: pull `ghcr.io/tomasvicar/latex-overleaf:latest`,
-  copy [`AGENTS.snippet.md`](AGENTS.snippet.md) in as `AGENTS.md` **and**
-  `CLAUDE.md` with your project ID substituted, write a `.gitignore` covering
+- What it should end up doing: pull the image, copy
+  [`AGENTS.snippet.md`](AGENTS.snippet.md) in as `AGENTS.md` **and** `CLAUDE.md`
+  with your project ID and image tag substituted, write a `.gitignore` covering
   `build/`, the aux patterns and `/main.pdf`, and leave you a `main.pdf`.
 - Your token stays out of it — the remote from step 1 already carries it.
 
@@ -133,8 +135,17 @@ No agent? Do those three things by hand, then compile:
 
 ```bash
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest
+  ghcr.io/tomasvicar/latex-overleaf:TL2025
 ```
+
+**Which tag.** Open **Menu → Settings → TeX Live version** in your Overleaf
+project and use the tag for that year — `:TL2025` today. Pinning is the whole
+point of the image, and only the `TL<year>` tag holds it: `:latest` follows
+whatever year this repo builds now, so it will move under you when Overleaf
+moves. Published tags are `TL2025` and `latest`; if your project sits on an
+older release, build that year yourself with
+`docker build --build-arg TL_YEAR=2024 .` — CI does not build old years, and you
+may have to drop `packages.txt` entries that did not exist yet.
 
 ### 3) Optional: add GitHub as a second remote
 
@@ -142,15 +153,26 @@ Overleaf alone is a complete setup — skip this and everything below still work
 GitHub buys you history browsing, branches, pull requests and CI, which the
 Overleaf git bridge has none of. The cost is one extra push per change.
 
+With the GitHub CLI, one line creates the repository and pushes to it:
+
 ```bash
-git remote add origin git@github.com:<you>/<repo>.git
+gh repo create <repo> --private --source=. --push
+```
+
+Without it, create an **empty** repository in the browser first — `git push` to
+one that does not exist fails with *Repository not found* — then:
+
+```bash
+git remote add origin git@github.com:<you>/<repo>.git      # or https://github.com/<you>/<repo>.git
 git push -u origin main
 ```
 
-Keep the repo **private** if the paper is unpublished — and note `AGENTS.md`
-carries your project ID once it is substituted in.
+The SSH form needs a key on your account; the HTTPS form asks for a personal
+access token. Keep the repo **private** if the paper is unpublished — and note
+`AGENTS.md` carries your project ID once it is substituted in.
 
-Detail: **[docs/pairing.md#adding-github-as-a-second-remote](docs/pairing.md)**.
+Detail: **[docs/pairing.md](docs/pairing.md#adding-github-as-a-second-remote)**
+— what GitHub buys you, and what it costs.
 
 ## Everyday commands
 
@@ -161,7 +183,7 @@ underneath it.
 ```bash
 git pull overleaf main --no-rebase        # before starting, and after a rejected push
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest
+  ghcr.io/tomasvicar/latex-overleaf:TL2025
 git add -A && git commit -m "..."
 git push overleaf main
 git push origin main                      # only if you added a GitHub remote
@@ -173,9 +195,24 @@ git push origin main                      # only if you added a GitHub remote
 - **A rejected push means someone edited in the browser.** Pull with
   `--no-rebase`, fix the conflict in the `.tex`, push again. Never rebase over
   Overleaf's commits.
+- **In PowerShell** every `docker run` above loses `-u "$(id -u):$(id -g)"` and
+  writes the mount as `-v "${PWD}:/work"`. The `git` lines are unchanged.
 
 Detail: **[docs/compiling.md](docs/compiling.md)** — XeLaTeX, a differently
 named main file, shell-escape, podman, reading a failed build.
+
+## When something fails
+
+| What you see | What it is |
+|---|---|
+| `Cannot connect to the Docker daemon` | Docker Desktop is not running; on Linux, your user is not in the `docker` group — `sudo usermod -aG docker $USER`, then log out and back in. |
+| `Authentication failed` on clone or push | The password on an Overleaf remote is the **git token**, never your account password. Tokens can be regenerated at <https://www.overleaf.com/user/settings>. |
+| `fatal: destination path '<my-paper>' already exists` | The directory is not empty, so `git clone` refuses it. Attach the remote to what is there: [docs/pairing.md](docs/pairing.md#attaching-to-a-directory-that-already-has-files). |
+| `compile-paper: no main.tex and no .tex file with \documentclass` | You are not in the paper directory, or the mount is wrong. In Git Bash `/work` is rewritten before Docker sees it — [docs/windows.md](docs/windows.md). |
+| `compile-paper: several candidate main files` | More than one `.tex` has a `\documentclass`. Name the right one: `... latex-overleaf:TL2025 manuscript.tex`. |
+| `LaTeX Error: File 'x.sty' not found` | The image lacks that package — see [Missing packages](#missing-packages). Do not rewrite the manuscript around it. |
+| `Updates were rejected` on `git push overleaf` | Someone edited the project in the browser. `git pull overleaf main --no-rebase`, resolve in the `.tex`, push again. Never force. |
+| `wsl --install` fails with `0x80370102` | Virtualization is off in the BIOS/UEFI — [docs/windows.md](docs/windows.md). |
 
 ## Telling an agent about it
 
@@ -217,7 +254,7 @@ compiles, whether GitHub issues are worth it, and the things that bite once.
 
   ```bash
   docker build -t latex-overleaf:local - <<'EOF'
-  FROM ghcr.io/tomasvicar/latex-overleaf:latest
+  FROM ghcr.io/tomasvicar/latex-overleaf:TL2025
   RUN tlmgr install datetime2 && kpsewhich datetime2.sty
   EOF
   ```
@@ -249,6 +286,13 @@ the question entirely with the upstream TeX Live **full** image (2.6 GB, no
 | [docs/using-upstream-texlive.md](docs/using-upstream-texlive.md) | The upstream full TeX Live image as an alternative |
 | [docs/prehled.html](docs/prehled.html) | Illustrated overview of the whole design (Czech) |
 
+The two things you copy into the paper itself:
+
+| | |
+|---|---|
+| [AGENTS.snippet.md](AGENTS.snippet.md) | Goes in as `AGENTS.md` and `CLAUDE.md` — the whole agent integration |
+| [skills/overleaf-paper/](skills/overleaf-paper/SKILL.md) | Optional Claude Code skill with the same commands |
+
 ## Repository layout
 
 ```
@@ -268,5 +312,9 @@ docs/                          everything in the table above
 
 When Overleaf moves to a new TeX Live release: change `DEFAULT_TL_YEAR` and the
 matrix entry in `.github/workflows/image.yml`, and `TL_YEAR` in the `Dockerfile`.
+Then sweep the year tag through the prose, which names it rather than `:latest`
+on purpose — `grep -rl TL2025 . --exclude-dir=.git`. Papers already set up keep
+compiling against the old year until someone edits their `AGENTS.md`, which is
+the point.
 Add the old year to the matrix to keep publishing its tag. Old tags keep working
 either way — that is the point of pinning to the historic repositories.

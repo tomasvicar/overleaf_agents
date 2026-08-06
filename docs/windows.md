@@ -77,11 +77,23 @@ docker run --rm hello-world
 Hyper-V mode and "Windows containers" are not what this needs — the image is a
 Linux one.
 
-## Then work inside WSL2
+## The two shells, and what each needs
 
-Open the Ubuntu shell (Start → Ubuntu, or `wsl` in any terminal), keep the paper
-under `~/`, and **every command in this repo works exactly as written**,
-`$(id -u)` included. Nothing on this page applies once you are there.
+Docker is the same single install either way — Docker Desktop on the WSL2
+backend, as in the steps above, WSL2 turned on first because Docker will not do
+it for you. What differs is the compile line, and where the files sit.
+
+**A. Ubuntu (WSL2)** — recommended, and the only shell where the commands in
+this repo need no adjusting at all, `$(id -u)` included:
+
+```bash
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:TL2025
+```
+
+Open it with Start → Ubuntu, or `wsl` in any terminal. Needs *Docker Desktop →
+Settings → Resources → WSL integration* enabled for the distribution, and the
+paper kept under `~/`. Nothing else on this page applies once you are there.
 
 A paper under `/mnt/c/...` also compiles, but bind mounts across the Windows
 filesystem boundary cost real time. Measured on one Windows 11 VM, same
@@ -95,46 +107,25 @@ says the same thing at greater length:
 Access your Linux files from Explorer with `\\wsl$\Ubuntu\home\<you>`, or type
 `explorer.exe .` in the Ubuntu shell.
 
-## The two shells, and what each needs
-
-Use one of these two. They differ only in the compile line, and in where the
-files sit.
-
-**1. Ubuntu (WSL2)** — recommended, and the only one where the commands in this
-repo need no adjusting at all:
-
-```bash
-docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest
-```
-
-Needs *Docker Desktop → Settings → Resources → WSL integration* enabled for the
-distribution, and the paper under `~/` — see the section above for what
-`/mnt/c` costs.
-
-**2. PowerShell** — drop `-u`: there is no `id` command to expand, and Docker
+**B. PowerShell** — drop `-u`: there is no `id` command to expand, and Docker
 Desktop maps ownership for you.
 
 ```powershell
-docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:latest
+docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:TL2025
 ```
 
 Verified: it writes `main.pdf` beside the source, byte-identical to the one the
 Linux command produces, readable and writable from Windows afterwards.
 
-Docker is the same single install either way — Docker Desktop on the WSL2
-backend, as in the install steps above, WSL2 turned on first because Docker will
-not do it for you. From PowerShell you then need *less* than for shell 1: no
-Ubuntu (Docker runs its own `docker-desktop` distribution) and no WSL
-integration toggle, because Docker Desktop puts `docker` on the Windows PATH by
-itself. The containers still run on WSL2 underneath — there is just no Linux
-shell in front of them. What you do need here is **Git for Windows**, since the
-`git` half of the workflow has no Ubuntu to live in.
-
-In 2 the paper lives on the Windows filesystem and is bind-mounted across the
-same boundary `/mnt/c` crosses, so expect the same penalty — that one was
-measured from inside WSL2, not from PowerShell in turn. It is the price of
-keeping the files on `C:`, not a property of the shell.
+This route needs *less* than A, not more: no Ubuntu (Docker runs its own
+`docker-desktop` distribution) and no WSL integration toggle, because Docker
+Desktop puts `docker` on the Windows PATH by itself. The containers still run on
+WSL2 underneath — there is just no Linux shell in front of them. What you do
+need is **Git for Windows**, since the `git` half of the workflow has no Ubuntu
+to live in. And the paper sits on the Windows filesystem, bind-mounted across
+the same boundary `/mnt/c` crosses, so expect the penalty measured above — that
+figure came from inside WSL2, not from PowerShell in turn, but it is the price
+of keeping the files on `C:`, not a property of the shell.
 
 **Not Git Bash**, and not `cmd.exe`. Git Bash rewrites the container path out
 from under Docker (first trap below) and lies to you about symlinks (second),

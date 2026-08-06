@@ -11,7 +11,7 @@ Install: copy this directory to `~/.claude/skills/overleaf-paper/`.
 
 ```bash
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest
+  ghcr.io/tomasvicar/latex-overleaf:TL2025
 ```
 
 Rootless podman instead: drop `-u`, and on SELinux systems mount as
@@ -37,7 +37,7 @@ extending the image:
 
 ```bash
 docker build -t latex-overleaf:local - <<'EOF'
-FROM ghcr.io/tomasvicar/latex-overleaf:latest
+FROM ghcr.io/tomasvicar/latex-overleaf:TL2025
 RUN tlmgr install PACKAGE && kpsewhich PACKAGE.sty
 EOF
 ```
@@ -81,9 +81,9 @@ For a marked-up PDF between two revisions, which is what replaces track changes:
 ```bash
 git show <rev>:main.tex > old.tex
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest latexdiff old.tex main.tex > diff.tex
+  ghcr.io/tomasvicar/latex-overleaf:TL2025 latexdiff old.tex main.tex > diff.tex
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest diff.tex
+  ghcr.io/tomasvicar/latex-overleaf:TL2025 diff.tex
 ```
 
 Remove `old.tex`, `diff.tex` and `diff.pdf` when done; never commit them.

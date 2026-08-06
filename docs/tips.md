@@ -72,9 +72,9 @@ For co-authors who want to *see* the changes, hand them a marked-up PDF.
 ```bash
 git show HEAD~5:main.tex > old.tex
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest latexdiff old.tex main.tex > diff.tex
+  ghcr.io/tomasvicar/latex-overleaf:TL2025 latexdiff old.tex main.tex > diff.tex
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest diff.tex
+  ghcr.io/tomasvicar/latex-overleaf:TL2025 diff.tex
 ```
 
 `diff.pdf` comes out with additions underlined and deletions struck through. Any
@@ -139,7 +139,7 @@ then land in one section rather than in `main.tex`, and you can hand an agent
   ```bash
   #!/bin/sh
   docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-    ghcr.io/tomasvicar/latex-overleaf:latest || exit 1
+    ghcr.io/tomasvicar/latex-overleaf:TL2025 || exit 1
   ```
 
   `chmod +x` it. Hooks are per-clone and not committed, so tell co-authors
