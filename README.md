@@ -39,12 +39,22 @@ machine, an Overleaf extension, or anything installed into the paper itself.
 - **macOS** — Docker Desktop,
   <https://docs.docker.com/desktop/setup/install/mac-install/>. Apple Silicon
   runs the native `arm64` image.
-- **Windows** — Docker Desktop with the **WSL2 backend**, then work inside the
-  Ubuntu shell, where every command in this repo runs exactly as written. New to
-  WSL? <https://learn.microsoft.com/windows/wsl/install> and
-  <https://docs.docker.com/desktop/setup/install/windows-install/>. PowerShell
-  works too — drop `-u` and use `${PWD}` — but a paper on the Windows
-  filesystem compiles ~2.5× slower, and Git Bash needs care.
+- **Windows** — Docker Desktop with the **WSL2 backend**,
+  <https://docs.docker.com/desktop/setup/install/windows-install/>. New to WSL?
+  <https://learn.microsoft.com/windows/wsl/install>. Then pick a shell — all
+  four work, they differ in what the compile line looks like:
+
+  1. **Ubuntu (WSL2)** — recommended. Every command in this repo runs exactly as
+     written, `$(id -u)` included. Needs *Docker Desktop → Settings → Resources
+     → WSL integration* switched on for the distribution, and the paper kept
+     under `~/` rather than `/mnt/c` — across that boundary compiles are ~2.5×
+     slower.
+  2. **PowerShell** — drop `-u`, and write the mount as `"${PWD}:/work"`.
+     Nothing to install beyond Git for Windows.
+  3. **cmd.exe** — as 2, with the mount as `-v "%cd%:/work"`.
+  4. **Git Bash** — as 2, plus `MSYS_NO_PATHCONV=1` in front of the command, or
+     the container path `/work` is rewritten to a Windows one and the compile
+     cannot find your `.tex`.
 
 Check both are there before going on; the second line should print a hello
 message and exit:

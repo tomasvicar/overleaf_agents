@@ -58,18 +58,44 @@ says the same thing at greater length:
 Access your Linux files from Explorer with `\\wsl$\Ubuntu\home\<you>`, or type
 `explorer.exe .` in the Ubuntu shell.
 
-## If you would rather stay in PowerShell
+## The four shells, and what each needs
 
-Drop `-u` — there is no `id` command to expand, and Docker Desktop maps
-ownership for you:
+All four compile the paper. They differ only in the compile line, and in where
+the files sit.
+
+**1. Ubuntu (WSL2)** — recommended, and the only one where the commands in this
+repo need no adjusting at all:
+
+```bash
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:latest
+```
+
+Needs *Docker Desktop → Settings → Resources → WSL integration* enabled for the
+distribution, and the paper under `~/` — see the section above for what
+`/mnt/c` costs.
+
+**2. PowerShell** — drop `-u`: there is no `id` command to expand, and Docker
+Desktop maps ownership for you.
 
 ```powershell
 docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:latest
 ```
 
 Verified: it writes `main.pdf` beside the source, byte-identical to the one the
-Linux command produces, readable and writable from Windows afterwards. In
-`cmd.exe` the mount is `-v "%cd%:/work"`.
+Linux command produces, readable and writable from Windows afterwards. Needs
+Git for Windows for the `git` half of the workflow.
+
+**3. `cmd.exe`** — as PowerShell, with the mount written `-v "%cd%:/work"`.
+
+**4. Git Bash** — as PowerShell, plus `MSYS_NO_PATHCONV=1` in front of the
+command; see the first trap below for why. Two of the four traps are Git Bash's
+alone, which is the reason it is last on this list rather than first.
+
+In 2–4 the paper lives on the Windows filesystem and is bind-mounted across the
+same boundary `/mnt/c` crosses, so expect the same penalty — that one was
+measured from inside WSL2, not from each shell in turn. It is the price of
+keeping the files on `C:`, not a property of the shell.
 
 ## Four traps
 
