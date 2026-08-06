@@ -15,10 +15,15 @@ account password is not. It can be revoked from the same page at any time.
 clone command: open the project and choose **Git** under the **Integrations**
 button in the left sidebar (older interface: **Menu → Git**).
 
-> Overleaf's git integration is a **paid-plan feature** (Overleaf Cloud
-> Standard/Professional, or Server Pro). Without it there is no git remote and
-> this workflow does not apply. Overleaf's own page on it:
-> <https://www.overleaf.com/learn/how-to/Git_integration>
+> Overleaf's git integration is a **premium feature, tied to the project
+> owner** — *"it will only be available if the project owner has a paid
+> subscription to Overleaf or has been granted access to the feature"*. So you
+> do not need a plan of your own: a project owned by a colleague on Overleaf
+> Cloud Standard/Professional, or living on a Server Pro instance, gives you the
+> git remote as a collaborator. What does not work is your own project on a free
+> account — there is no remote to clone, and this workflow does not apply.
+> Overleaf's page on it:
+> <https://docs.overleaf.com/integrations-and-add-ons/git-integration-and-github-synchronization/git-integration>
 
 Neither value should go to an agent. Pairing is four commands you run once; an
 agent cannot fetch either value for you, and there is nothing it can do with

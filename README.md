@@ -42,9 +42,11 @@ most of it downloads. After that you are in
 
 ### 0) Prerequisites
 
-You need `git`, `docker`, and an Overleaf **paid plan** — the git integration
-this builds on is a paid-plan feature. You do *not* need TeX Live on your
-machine, an Overleaf extension, or anything installed into the paper itself.
+You need `git`, `docker`, and an Overleaf project whose **owner** is on a paid
+plan. Git integration is a premium feature, but it goes by the owner's
+subscription, not yours: a project shared with you by a colleague who pays works
+from your free account. You do *not* need TeX Live on your machine, an Overleaf
+extension, or anything installed into the paper itself.
 
 - **Linux** — Docker Engine, <https://docs.docker.com/engine/install/>. Rootless
   podman also works: drop `-u`, and add `:Z` to the mount on SELinux systems.
