@@ -50,7 +50,9 @@ machine, an Overleaf extension, or anything installed into the paper itself.
      under `~/` rather than `/mnt/c` — across that boundary compiles are ~2.5×
      slower.
   2. **PowerShell** — drop `-u`, and write the mount as `"${PWD}:/work"`.
-     Nothing to install beyond Git for Windows.
+     Docker Desktop puts `docker` on the Windows PATH by itself, so this needs
+     no WSL integration toggle — but it still runs on the WSL2 backend
+     underneath, and you still need Git for Windows for the `git` half.
 
   Not Git Bash: it rewrites the container path and the compile fails to find
   your `.tex`.

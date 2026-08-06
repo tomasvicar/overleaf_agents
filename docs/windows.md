@@ -83,8 +83,14 @@ docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:latest
 ```
 
 Verified: it writes `main.pdf` beside the source, byte-identical to the one the
-Linux command produces, readable and writable from Windows afterwards. Needs
-Git for Windows for the `git` half of the workflow.
+Linux command produces, readable and writable from Windows afterwards.
+
+Docker is the same single install either way — Docker Desktop, WSL2 backend, as
+in step 2 above. It adds `docker` to the Windows PATH on its own, so from
+PowerShell you can skip the WSL-integration toggle that step 2 needs; the
+containers still run on WSL2 underneath, there is just no Linux shell in front
+of them. What you do need here is **Git for Windows**, since the `git` half of
+the workflow has no Ubuntu to live in.
 
 In 2 the paper lives on the Windows filesystem and is bind-mounted across the
 same boundary `/mnt/c` crosses, so expect the same penalty — that one was
