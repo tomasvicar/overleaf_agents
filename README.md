@@ -270,7 +270,8 @@ directory layout, and prompts worth stealing.
 - Write **one sentence per line** — the PDF is identical, but diffs and merges
   become per-sentence instead of per-paragraph.
 
-Detail: **[docs/tips.md](docs/tips.md)** — those recipes, the
+Detail: **[docs/tips.md](docs/tips.md)** — giving the agent your notes, code and
+results to write from (the highest-value habit on that page), those recipes, the
 `[final,obeyFinal]` trap, tagging what you send out, a `pre-push` hook that
 compiles, whether GitHub issues are worth it, and the things that bite once.
 
@@ -305,7 +306,7 @@ the question entirely with the upstream TeX Live **full** image (2.6 GB, no
 
 | | |
 |---|---|
-| [docs/tips.md](docs/tips.md) | Comments and notes, diffable source, git habits, review rounds |
+| [docs/tips.md](docs/tips.md) | Giving the agent context, comments and notes, diffable source, git habits |
 | [docs/pairing.md](docs/pairing.md) | Token, project ID, remotes, `.gitignore` |
 | [docs/compiling.md](docs/compiling.md) | Compile options, podman, reading a failed build |
 | [docs/windows.md](docs/windows.md) | WSL2 + Docker Desktop, and the Windows traps |

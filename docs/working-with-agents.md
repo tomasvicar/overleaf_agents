@@ -27,8 +27,10 @@ explanation is a small mystery you will have to solve twice.
 
 ## Give it the rest of the project
 
-The paper repository has to stay exactly what Overleaf sees, so your analysis
-code does not belong in it. Put it next door and start the agent one level up:
+The single highest-value thing on this page, and
+[tips.md](tips.md#give-the-agent-your-context) argues the case at length. The paper repository has to stay exactly what
+Overleaf sees, so your analysis code does not belong in it. Put it next door and
+start the agent one level up:
 
 ```
 project/

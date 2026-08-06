@@ -1,8 +1,58 @@
 # Tips: comments, notes, and writing a paper in git
 
-Practical advice for the part that is not `docker run` — how to leave comments
-when Overleaf's comments do not reach you, how to keep the source diffable, and
-the small habits that make a co-authored paper in git behave.
+Practical advice for the part that is not `docker run` — how to give an agent
+something to write from, how to leave comments when Overleaf's comments do not
+reach you, how to keep the source diffable, and the small habits that make a
+co-authored paper in git behave.
+
+## Give the agent your context
+
+If you take one tip from this page, take this one. What an agent produces is
+bounded by what it can read, far more than by how you phrase the request. An
+agent with only `main.tex` in front of it can reword your sentences. An agent
+that can also read the script that made Figure 3, the CSV behind Table 2 and
+last week's lab notes can tell you that the number in your abstract is not the
+number the script printed — and that is a different tool.
+
+So put the material where it can reach it, next to the paper rather than inside
+it, and start the agent one level up:
+
+```
+project/
+  paper/      <- the Overleaf clone; the only thing that gets pushed
+  analysis/   <- the code that produced the numbers, and its outputs
+  notes/      <- lab notes, meeting minutes, reviewer emails, the grant text
+  refs/       <- the journal's author guidelines, papers you are answering to
+```
+
+Start the agent in `project/`. It reads all four directories and still only ever
+commits inside `paper/`.
+
+Worth having there, roughly in order of how often it earns its place:
+
+- **Results as data, not as prose** — the CSV, the JSON, the summary table the
+  script writes. "Every number must come from `results/summary.csv`" is an
+  instruction an agent can actually follow, and one you can check.
+- **The analysis code itself.** It answers *what does this column mean*, *was
+  this the corrected run*, *what n does this reflect* without you in the loop.
+- **Reviewer comments and your previous responses**, so a revision round starts
+  from the record rather than from your memory of it.
+- **The journal's guidelines** — word limits, section structure, reference
+  style. An agent that has read them stops proposing a discussion twice the
+  allowed length.
+- **Notes and meeting minutes**, including the messy ones. This is where the
+  reasons live, and reasons are what prose needs.
+
+**Why beside the repo and not in it.** Everything committed inside `paper/`
+syncs to Overleaf and appears in every co-author's browser — draft notes,
+unpublished data, the paragraph about the reviewer you found unhelpful. Keeping
+them next door means the agent sees them and Overleaf never does. If you really
+want them in one tree, `.gitignore` them and know what you are relying on: one
+stale ignore rule plus a `git add -A` puts your lab notebook in front of the
+whole author list.
+
+[working-with-agents.md](working-with-agents.md) has the prompts that use this
+layout, and the rest of the agent-specific advice.
 
 ## Comments and notes do not survive the git bridge
 
