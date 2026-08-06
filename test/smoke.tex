@@ -74,6 +74,12 @@
 \usepackage{lipsum}
 \usepackage{blindtext}
 \usepackage{appendix}
+% Loading these two is not enough to test them: changes pulls in truncate at
+% \begin{document} time, and both are only exercised by using their commands.
+\usepackage{todonotes}
+% tcolorbox defines \comment, which changes also wants; ifneeded prefixes only
+% the names that actually clash
+\usepackage[commandnameprefix=ifneeded]{changes}
 
 \doublespacing
 \linenumbers
@@ -161,6 +167,8 @@ with $\bm{v}$ the velocity field. \Cref{eq:shear} is referenced through
 \end{acronym}
 
 Run under \ac{CI}.\footnote{Set at the bottom of the page by \texttt{footmisc}.}
+\todo{A margin note, from \texttt{todonotes}.}
+\added{Added} and \deleted{deleted} text, from \texttt{changes}.
 Hyphenation patterns for a second language load through \texttt{babel}:
 \foreignlanguage{czech}{příliš žluťoučký kůň úpěl ďábelské ódy}.
 

@@ -291,9 +291,17 @@ Put them in the source, where both sides can see them:
 | `\todo{is this the Aug run?}` (`todonotes`) | Renders in the margin of the compiled PDF, so a browser-only co-author sees it on Overleaf without doing anything. |
 | `\added{}`, `\deleted{}`, `\replaced{}` (`changes`) | Marks up who changed what, in the PDF, and `\listofchanges` collects them. The closest thing to track changes that is made of text. |
 
-Both packages are in the image. Neither has to be stripped before submission:
-`\usepackage[final]{todonotes}` and `\usepackage[final]{changes}` make the
-markup vanish without deleting any of it.
+Both packages are in the image, and neither has to be stripped before
+submission — the markup switches off where the package is loaded, without
+deleting any of it. Watch the options, because they do not match: `changes`
+hides on `[final]`, but `todonotes` needs **`[final,obeyFinal]`**. `[final]`
+alone is silently a no-op there, which is a tidy way to submit a manuscript
+with your own margin notes still in it.
+
+One collision to know about, since both packages are in the image:
+`tcolorbox` defines `\comment` and so does `changes`, so loading both is an
+error. `\usepackage[commandnameprefix=ifneeded]{changes}` renames only the
+commands that actually clash and leaves `\added` and `\deleted` alone.
 
 One thing to ask of co-authors: if they are editing in the browser with track
 changes on, have them accept or reject before you pull. What the bridge hands

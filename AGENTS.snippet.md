@@ -83,8 +83,11 @@ Leave anything that needs saying in the source instead:
   a co-author working in the browser will see it. A plain `%` comment reaches
   whoever edits the source next, and nobody else.
 - Mark substantive rewrites with `changes`: `\added{}`, `\deleted{}`,
-  `\replaced{}`. `\usepackage[final]{...}` hides either package's markup for
-  submission without deleting any of it.
+  `\replaced{}`.
+
+Both hide their markup for submission without deleting it, but the options
+differ: `\usepackage[final]{changes}` and `\usepackage[final,obeyFinal]{todonotes}`.
+`[final]` on its own does nothing in `todonotes`.
 
 To show what changed between two revisions, build the marked-up PDF rather than
 describing it in prose:

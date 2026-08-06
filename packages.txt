@@ -76,6 +76,9 @@ xpatch
 comment
 todonotes
 changes
+# changes.sty does \RequirePackage{truncate} unconditionally; without it
+# \usepackage{changes} fails in any document
+truncate
 pdfpages
 pdflscape
 footmisc
