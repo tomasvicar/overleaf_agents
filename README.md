@@ -218,17 +218,32 @@ docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:latest
 
 In `cmd.exe` the mount is `-v "%cd%:/work"` instead.
 
-Three traps, all of them Windows-specific:
+Three traps, all of them Windows-specific, all three checked on a Windows 11
+machine with Git for Windows 2.55:
 
 - **Git Bash rewrites container paths.** MSYS turns `/work` into
-  `C:/Program Files/Git/work` before Docker sees it, and the compile stops with
-  *no main.tex ... is the project directory mounted at /work?*. Prefix the
-  command with `MSYS_NO_PATHCONV=1`, or write the container side as `//work`.
-- **Symlinks need Developer Mode.** `ln -s AGENTS.md CLAUDE.md` fails without
-  it. Copy the file twice instead, and remember edits have to go into both.
-- **Line endings.** Overleaf stores LF. Set `git config core.autocrlf input` in
-  the paper repo so nothing ever commits CRLF into it — otherwise a co-author
-  sees a diff touching every line of a file you changed one word in.
+  `C:/Program Files/Git/work` before Docker ever sees it — verbatim, that is
+  what `cmd //c echo /work` prints — and the compile then stops with *no
+  main.tex ... is the project directory mounted at /work?*. Prefix the command
+  with `MSYS_NO_PATHCONV=1`, or write the container side as `//work`.
+- **`ln -s` does not fail — it silently copies.** In Git Bash,
+  `ln -s AGENTS.md CLAUDE.md` exits 0 and leaves you a *second regular file*.
+  Editing `AGENTS.md` afterwards changes nothing in `CLAUDE.md`, which is the
+  drift the symlink was there to prevent, arriving quietly. Either accept two
+  files and edit both, or ask for a real one with
+  `MSYS=winsymlinks:nativestrict ln -s AGENTS.md CLAUDE.md`, which needs
+  Developer Mode or an elevated shell.
+- **Line endings.** Git for Windows ships `core.autocrlf=true` in its system
+  config, and Overleaf stores LF. Set `git config core.autocrlf input` in the
+  paper repo so nothing commits CRLF into it — otherwise a co-author gets a
+  diff touching every line of a file you changed one word in.
+
+And one that is not Windows-specific but only bites there: **do not commit the
+`CLAUDE.md` symlink if anyone on the paper uses Windows.** Git for Windows also
+defaults to `core.symlinks=false`, so a symlink stored in the repository checks
+out as a 9-byte text file containing the string `AGENTS.md` — and an agent
+reading it finds that, instead of your instructions. Two real files, or a
+`.gitattributes` marking the path, are the only things that survive the trip.
 
 ### podman, and Fedora/RHEL
 
@@ -427,8 +442,12 @@ cp AGENTS.snippet.md /path/to/paper/AGENTS.md
 ln -s AGENTS.md /path/to/paper/CLAUDE.md      # or just copy it twice
 ```
 
-A symlink keeps the two from drifting apart. On Windows without developer mode,
-copy the file instead and remember to edit both. That is the whole integration.
+A symlink keeps the two from drifting apart, and is the right answer when
+everyone on the paper is on Linux or macOS. **If anyone is on Windows, commit
+two real files instead** — Git for Windows defaults to `core.symlinks=false`,
+so what they check out is a text file containing the word `AGENTS.md`, and the
+agent reading it finds that rather than your instructions. See
+[Windows](#windows). That is the whole integration either way.
 
 If you want a `/paper` slash command in Claude Code on top of that, copy
 [`skills/overleaf-paper/SKILL.md`](skills/overleaf-paper/SKILL.md) into

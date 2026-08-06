@@ -5,8 +5,11 @@ whichever agent someone reaches for:
     cp AGENTS.snippet.md /path/to/paper/AGENTS.md   # Codex, Gemini CLI, others
     ln -s AGENTS.md /path/to/paper/CLAUDE.md        # Claude Code
 
-The symlink keeps the two from drifting apart. On Windows without developer
-mode, copy the file twice and remember to edit both.
+The symlink keeps the two from drifting apart -- but only where symlinks
+survive. If anyone on the paper works on Windows, commit two real files: Git
+for Windows defaults to core.symlinks=false and checks a committed symlink out
+as a text file containing the string "AGENTS.md". In Git Bash, `ln -s` does not
+even warn you: it exits 0 and silently makes a copy.
 
 Replace <PROJECT_ID> and delete anything that does not apply.
 -->
