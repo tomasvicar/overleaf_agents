@@ -23,9 +23,9 @@ docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
 
 ## Quick start
 
-Set-up is a one-off: install Docker (**0**), let an agent lay the directory out
-(**1**), connect it to your Overleaf project (**2**). Step **3** is optional.
-Fifteen minutes, most of it downloads. After that you are in
+Set-up is a one-off: install Docker (**0**), clone your Overleaf project (**1**),
+let an agent fill in the rest (**2**). Step **3** is optional. Fifteen minutes,
+most of it downloads. After that you are in
 [Everyday commands](#everyday-commands).
 
 ### 0) Prerequisites
@@ -89,32 +89,10 @@ docker run --rm hello-world
 Detail: **[docs/windows.md](docs/windows.md)** — install steps and four
 Windows-specific traps.
 
-### 1) Let an agent set the directory up
+### 1) Clone your Overleaf project
 
-Make an **empty** directory for the paper, open a coding agent — Claude Code,
-Codex, Gemini CLI — in it, and give it one line:
-
-```bash
-mkdir <my-paper> && cd <my-paper>
-```
-
-> Set this directory up as an Overleaf-linked paper repository following
-> <https://github.com/tomasvicar/overleaf_agents>, and tell me how to pair it
-> with my Overleaf project.
-
-- It reads this repo for the rest: which files to copy in, which image to pull,
-  what the remote should be called.
-- What it should end up doing: pull `ghcr.io/tomasvicar/latex-overleaf:latest`,
-  copy [`AGENTS.snippet.md`](AGENTS.snippet.md) in as `AGENTS.md` **and**
-  `CLAUDE.md`, and write a `.gitignore` with `build/`, the aux patterns and
-  `/main.pdf`.
-- Do not give it your Overleaf token — step 2 is yours.
-
-No agent? Do those three things by hand; nothing here needs one.
-
-### 2) Connect the directory to your Overleaf project
-
-Two values, both from Overleaf, both collected by you:
+Two values, both from Overleaf, both collected by you — an agent can fetch
+neither, and there is nothing it could do with them faster than you can:
 
 - **Token** — <https://www.overleaf.com/user/settings> → **Git integration** →
   **Generate token**. Copy it at once; Overleaf will not show it again. It is
@@ -123,38 +101,40 @@ Two values, both from Overleaf, both collected by you:
   `overleaf.com/project/<PROJECT_ID>`. The project's **Integrations → Git**
   dialog also shows the whole clone command with the ID in it.
 
-If the directory is still empty, one clone does it:
-
 ```bash
 git clone https://git:<TOKEN>@git.overleaf.com/<PROJECT_ID> <my-paper>
 cd <my-paper>
 git remote rename origin overleaf
 ```
 
-If step 1 already put files there, `git clone` refuses — attach the remote to
-what is there instead:
+The Overleaf side is now the remote called `overleaf` — that name is what every
+instruction in this repo, and every instruction an agent gets, is written
+against. `ls main.tex` should show your manuscript.
+
+Detail: **[docs/pairing.md](docs/pairing.md)** — keeping the token off disk,
+older projects on `master`, attaching to a directory that already has files.
+
+### 2) Let an agent set the rest up
+
+Open a coding agent — Claude Code, Codex, Gemini CLI — **in that directory**,
+and give it one line:
+
+> Set this directory up as an Overleaf-linked paper repository following
+> <https://github.com/tomasvicar/overleaf_agents>, then compile the paper.
+
+- It reads this repo for the rest: which files to copy in, which image to pull.
+- What it should end up doing: pull `ghcr.io/tomasvicar/latex-overleaf:latest`,
+  copy [`AGENTS.snippet.md`](AGENTS.snippet.md) in as `AGENTS.md` **and**
+  `CLAUDE.md` with your project ID substituted, write a `.gitignore` covering
+  `build/`, the aux patterns and `/main.pdf`, and leave you a `main.pdf`.
+- Your token stays out of it — the remote from step 1 already carries it.
+
+No agent? Do those three things by hand, then compile:
 
 ```bash
-git init -b main
-git remote add overleaf https://git:<TOKEN>@git.overleaf.com/<PROJECT_ID>
-git fetch overleaf
-git branch -f main overleaf/main
-git symbolic-ref HEAD refs/heads/main
-git reset --hard main       # overwrites same-named local files — copy them aside first
-git branch --set-upstream-to=overleaf/main main
-```
-
-Either way the Overleaf side is now the remote called `overleaf`. Check it
-worked — the manuscript is here and it builds:
-
-```bash
-ls main.tex
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
   ghcr.io/tomasvicar/latex-overleaf:latest
 ```
-
-Detail: **[docs/pairing.md](docs/pairing.md)** — keeping the token off disk,
-older projects on `master`, the full `.gitignore`.
 
 ### 3) Optional: add GitHub as a second remote
 
