@@ -48,8 +48,11 @@ machine, an Overleaf extension, or anything installed into the paper itself.
   winget install -e --id Docker.DockerDesktop    # or the installer from the link below
   ```
 
-  Start Docker Desktop from the Start menu once and leave it running — the whale
-  in the tray. Then work in one of two shells:
+  `wsl --install` turns on the Windows features itself — there is no checkbox to
+  find first. The one thing it cannot do is enable **virtualization in the
+  BIOS/UEFI**; if it fails with `0x80370102` or `0x80070003`, that is what is
+  off. Start Docker Desktop from the Start menu once and leave it running — the
+  whale in the tray. Then work in one of two shells:
 
   1. **Ubuntu (WSL2)** — recommended. Every command in this repo runs exactly as
      written, `$(id -u)` included. Tick *Docker Desktop → Settings → Resources →

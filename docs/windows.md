@@ -27,9 +27,20 @@ Docker Desktop 29.6.2.
    not need Ubuntu. Installing Ubuntu anyway costs a few hundred MB and keeps
    the better option open.
 
-   On an older Windows 10 the virtualisation features may need turning on
-   separately; that page covers it, and it is the one thing here that can need
-   a second reboot.
+   You do not need to hunt for Windows features to tick beforehand: on Windows
+   11 or Windows 10 2004+ (build 19041+) this one command *"will enable the
+   features necessary to run WSL and install the Ubuntu distribution"*. Below
+   that build, WSL needs the manual route instead:
+   <https://learn.microsoft.com/windows/wsl/install-manual>.
+
+   What the command cannot switch on is **virtualization in the BIOS/UEFI**. If
+   it fails with `0x80370102` or `0x80070003`, that is the cause — turn
+   virtualization on in the firmware setup (the wording differs per vendor;
+   Microsoft's walkthrough:
+   <https://support.microsoft.com/windows/c5578302-6e43-4b4b-a449-8ced115f58e1>)
+   and reboot. Inside a VM it is nested virtualization that has to be exposed by
+   the host, and a CPU older than roughly Intel Nehalem cannot run WSL2 at all —
+   it lacks SLAT.
 
 2. **Docker Desktop.** Either
 
