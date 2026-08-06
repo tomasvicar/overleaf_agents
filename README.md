@@ -17,6 +17,24 @@ That compiles `main.tex` and writes `main.pdf` next to it. Aux files land in
 
 ---
 
+## Quick start with an agent
+
+Open a coding agent — Claude Code, Codex, Gemini CLI — in the directory you
+want the paper in, and give it one line:
+
+> Set this directory up as an Overleaf-linked paper repository following
+> <https://github.com/tomasvicar/overleaf_agents>, and tell me how to pair it
+> with my Overleaf project.
+
+It reads the rest of this README for the details: which files to copy in, which
+image to pull, what the git remote should be called.
+
+Then pair the project yourself with the commands in [Setup](#setup-once-per-paper),
+rather than handing your Overleaf token to the agent. After that it is all one
+conversation — *fix the overfull boxes in section 3, rebuild, push to Overleaf*.
+
+---
+
 ## Why this works without a full TeX Live install
 
 Overleaf runs a specific TeX Live release, which you can see in **Menu →
@@ -37,30 +55,8 @@ has to be done once per package, for everyone.
 
 ## Setup, once per paper
 
-### The short path: hand it to an agent
-
-If you already have a coding agent in your terminal — Claude Code, Codex,
-Gemini CLI, Cursor — it can do all of the setup below. Open it in the directory
-you want the paper in and paste this, with your two values filled in:
-
-> Set this directory up as an Overleaf-linked paper repository, following the
-> README at <https://github.com/tomasvicar/overleaf_agents>.
->
-> 1. Pair it with my Overleaf project: ID `<PROJECT_ID>`, git token `<TOKEN>`.
->    Name the Overleaf remote `overleaf`. Do not add a GitHub remote.
-> 2. Copy that repository's `AGENTS.snippet.md` in as `AGENTS.md`, symlink
->    `CLAUDE.md` to it, and keep the link to the upstream repository at the top
->    of it, so the next person can see where these instructions came from.
-> 3. Add the `.gitignore` for aux files that its README gives.
-> 4. Pull `ghcr.io/tomasvicar/latex-overleaf:latest` and compile the project
->    with it. If it does not build, show me the first error.
->
-> Do not commit or push anything yet — I want to look first.
-
-Everything after that is the same conversation: *fix the overfull boxes in
-section 3, rebuild, push to Overleaf*.
-
-The two values in step 1 are yours to fetch; an agent cannot get them for you.
+The two values below are yours to fetch — an agent cannot get them for you,
+and there is no reason to give it either one.
 
 ### 1. Get an Overleaf git token
 
