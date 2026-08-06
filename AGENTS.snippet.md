@@ -31,6 +31,10 @@ docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
 ```
 
 - Produces `main.pdf` in the repo root; aux files go to `build/` (gitignored).
+  With no argument the entrypoint takes `main.tex`, or the single top-level
+  `.tex` that has a `\documentclass` if the manuscript is named otherwise; if
+  several qualify it stops and asks for a name. The PDF is named after the
+  source, so check `.gitignore` ignores that name.
 - The `TL2025` tag pins the image to the same TeX Live release as the Overleaf
   project, so a successful local compile means it compiles on Overleaf too. Use
   that tag, not `:latest` — `:latest` moves to a new TeX Live year when the

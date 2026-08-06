@@ -119,6 +119,10 @@ its own copy, so committing yours produces a binary conflict on every build.
 Keep it out unless you specifically want the PDF browsable on GitHub — and note
 that `*.pdf` would be wrong, since figures are often PDFs.
 
+**The PDF is named after your main file.** If the manuscript is
+`manuscript.tex`, the line has to be `/manuscript.pdf`; `/main.pdf` matches
+nothing and the PDF goes to Overleaf on your next `git add -A`.
+
 ## Pushing
 
 Overleaf **forbids force pushes**. Treat local `main` as the source of truth and

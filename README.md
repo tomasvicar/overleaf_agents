@@ -118,9 +118,10 @@ git remote rename origin overleaf
 
 The Overleaf side is now the remote called `overleaf` — that name is what every
 instruction in this repo, and every instruction an agent gets, is written
-against. `ls` should show your manuscript; the main file is usually `main.tex`,
-and if yours is called something else, note the name — the compile takes it as
-an argument.
+against. `ls` should show your manuscript. If the main file is not `main.tex`
+the compile still finds it, as long as it is the only top-level `.tex` with a
+`\documentclass`; note the name anyway, because the PDF inherits it and so does
+the `.gitignore` line ([docs/compiling.md](docs/compiling.md#when-the-main-file-is-not-maintex)).
 
 **Where the token ends up.** Written into the clone URL, it is saved in
 `<my-paper>/.git/config` as part of the remote address — in plain text, inside

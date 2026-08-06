@@ -7,12 +7,41 @@ docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
   ghcr.io/tomasvicar/latex-overleaf:TL2025
 ```
 
-It finds the main file, runs `latexmk`, writes `main.pdf` to the repo root and
-aux files to `build/`. Worth an alias in `~/.bashrc`:
+It finds the main file, runs `latexmk`, writes the PDF to the repo root and aux
+files to `build/`. Worth an alias in `~/.bashrc`:
 
 ```bash
 alias paper='docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" ghcr.io/tomasvicar/latex-overleaf:TL2025'
 ```
+
+## When the main file is not `main.tex`
+
+Usually nothing to do — the entrypoint picks it up. In order:
+
+1. A filename you pass as an argument wins.
+2. Otherwise `main.tex`, if it is there.
+3. Otherwise the `.tex` files in the top of the directory are searched for
+   `\documentclass`, and if **exactly one** has it, that is the manuscript.
+   `sections/*.tex` and other `\input{}` fragments are not candidates — the
+   search is not recursive and they carry no `\documentclass`.
+
+So `manuscript.tex` alone compiles with the plain command and writes
+`manuscript.pdf`. Two files with a `\documentclass` — a manuscript and a
+`supplement.tex`, say — are ambiguous, and the container says so rather than
+guessing:
+
+```
+compile-paper: several candidate main files; name one explicitly:
+  ./manuscript.tex
+  ./supplement.tex
+```
+
+Then name it: `... latex-overleaf:TL2025 manuscript.tex`.
+
+**The PDF takes the name of the source**, which is the one thing to remember
+elsewhere: `manuscript.tex` produces `manuscript.pdf`, so the `.gitignore` line
+is `/manuscript.pdf`. The stock `/main.pdf` would not match it, and an unignored
+PDF syncs to Overleaf and conflicts on every build.
 
 ## Variants
 

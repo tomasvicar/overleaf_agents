@@ -197,9 +197,11 @@ then land in one section rather than in `main.tex`, and you can hand an agent
 - **Commit messages in the imperative, one change each.** They are the change
   log you will be reading back to co-authors, and the thing an agent summarises
   when you ask what happened last week.
-- **Never commit `main.pdf`.** Overleaf builds its own, so a committed PDF is a
-  binary conflict on every build. `/main.pdf` in `.gitignore`, not `*.pdf` —
-  figures are often PDFs.
+- **Never commit the built PDF.** Overleaf builds its own, so a committed PDF is
+  a binary conflict on every build. `/main.pdf` in `.gitignore`, not `*.pdf` —
+  figures are often PDFs. If your manuscript is `thesis.tex`, the line is
+  `/thesis.pdf`: the output is named after the source, and the stock rule
+  silently does not cover it.
 - **Keep the repo private if the paper is unpublished**, and remember that
   `AGENTS.md` carries your Overleaf project ID once you substitute it in. Not
   access on its own, but not something to publish without meaning to.
