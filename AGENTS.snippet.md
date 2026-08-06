@@ -107,10 +107,18 @@ Delete `old.tex`, `diff.tex` and `diff.pdf` afterwards — they are not part of
 the manuscript and must not be committed. For a journal word limit, run
 `texcount -1 -sum main.tex` through the container the same way.
 
+More on all of this — comment conventions, review rounds, git habits:
+<https://github.com/tomasvicar/overleaf_agents/blob/main/docs/tips.md>.
+
 ## Conventions
 
 - Never edit `*.cls` or `*.bst` files — they are the journal's, and the journal
   will use its own copies anyway.
+- One sentence per line. LaTeX ignores single newlines, so the PDF is unchanged,
+  but a diff then shows the sentence that changed rather than a repainted
+  paragraph, and a merge with an Overleaf edit resolves per sentence. Keep the
+  existing line structure of a paragraph you are editing; do not reflow one you
+  are not.
 - Bibliography entries go in the `.bib` file, never inline in the `.tex`.
 - Figures are referenced by `\label`/`\ref`, never by hardcoded numbers.
 - Everything committed here syncs into the Overleaf project and appears in every

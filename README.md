@@ -117,7 +117,7 @@ this actually work: giving the agent your `analysis/` and `notes/` alongside the
 paper so it writes from your real numbers, and prompts worth stealing —
 proofread-build-push, a round of reviewer comments, fix-the-first-error.
 
-## Comments and review
+## Comments, notes and other tips
 
 The git bridge moves files. Overleaf's **comment threads and track changes are
 not files** — they live in Overleaf's database, they do not arrive with a clone,
@@ -126,8 +126,10 @@ render in the PDF where a browser-only co-author sees them, `changes` for
 marked-up rewrites, and `latexdiff` (in the image) to show a co-author what
 changed between two revisions.
 
-**[docs/review-and-comments.md](docs/review-and-comments.md)** has the recipes,
-the `[final,obeyFinal]` trap, and whether GitHub issues are worth it.
+**[docs/tips.md](docs/tips.md)** is the advice collection: those recipes and the
+`[final,obeyFinal]` trap, writing one sentence per line so diffs and merges stay
+readable, tagging what you send out, a `pre-push` hook that compiles, whether
+GitHub issues are worth it, and the things that bite you once.
 
 ## Missing packages
 
@@ -169,11 +171,11 @@ test/                          ten manuscripts CI compiles: smoke, journal
 .github/workflows/image.yml    build, smoke test, push multi-arch to GHCR
 AGENTS.snippet.md              paste-into-your-paper-repo instructions for agents
 skills/overleaf-paper/         optional Claude Code skill
+docs/tips.md                   comments, notes, diffable source, git habits
 docs/pairing.md                token, project ID, remotes, .gitignore
 docs/compiling.md              compile options, podman, reading a failed build
 docs/windows.md                WSL2 + Docker Desktop, and the Windows traps
 docs/working-with-agents.md    giving an agent context, and prompts that work
-docs/review-and-comments.md    todonotes, changes, latexdiff, GitHub issues
 docs/adding-packages.md        adding a package, forking to publish your own image
 docs/using-upstream-texlive.md the upstream full TeX Live image as an alternative
 docs/prehled.html              illustrated overview of the whole design (Czech)

@@ -95,16 +95,10 @@ how to read a failure, the sync rules and the latexdiff recipe, so you get them
 in a fresh session without an `AGENTS.md` in front of it. It is not a separate
 mechanism and it does not replace `AGENTS.md` in the paper repo.
 
-## Small things that pay off
+## Two habits that make an agent much more useful
 
-- `git config pull.rebase false` in the paper repo. Overleaf's commits must
-  never be rebased, and this makes the safe behaviour the default for everything
-  working in that clone, agents included.
-- A `pre-push` hook that compiles first. Two lines, and it removes the only
-  really embarrassing failure mode — a broken build visible to every co-author.
-- `echo '*.tex diff=tex' >> .gitattributes`. Git then labels diff hunks with the
-  section they are in, which makes both `git diff` and the agent's reading of it
-  markedly better.
-- Commit messages in the imperative, one change each. They are the change log
-  you will be reading back to co-authors, and the thing the agent summarises
-  when you ask what happened last week.
+One sentence per line in the `.tex`, and `*.tex diff=tex` in `.gitattributes`.
+Both are about the diff: the first makes an agent's edits reviewable one
+sentence at a time instead of as a repainted paragraph, the second tells git to
+label each hunk with the section it is in. [tips.md](tips.md) has these and the
+rest of the practical advice — comments, notes, review rounds, git habits.
