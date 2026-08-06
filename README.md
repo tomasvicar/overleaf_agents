@@ -30,6 +30,16 @@ most of it downloads. After that you are in
 [Everyday commands](#everyday-commands) — and if a step does not go as written,
 [When something fails](#when-something-fails).
 
+> **You do not have to read this alone.** Open any coding agent — Claude Code,
+> Codex, Gemini CLI — and point it here:
+>
+> > Read <https://github.com/tomasvicar/overleaf_agents> and walk me through
+> > setting up a paper repository on my machine, one step at a time.
+>
+> It has the same four steps in front of it, can see which of them your machine
+> already satisfies, and can read the error back when something does not work.
+> The two values in step 1 stay yours to fetch.
+
 ### 0) Prerequisites
 
 You need `git`, `docker`, and an Overleaf **paid plan** — the git integration
@@ -42,8 +52,9 @@ machine, an Overleaf extension, or anything installed into the paper itself.
   <https://docs.docker.com/desktop/setup/install/mac-install/>. Apple Silicon
   runs the native `arm64` image.
 - **Windows** — **WSL2 first, then Docker Desktop**: Docker treats WSL2 as a
-  prerequisite and does not turn it on for you. In an *administrator*
-  PowerShell:
+  prerequisite and does not turn it on for you
+  (<https://learn.microsoft.com/windows/wsl/install> is Microsoft's own page for
+  this step). In an *administrator* PowerShell:
 
   ```powershell
   wsl --install                                  # WSL2 + Ubuntu; reboot when it asks
@@ -54,11 +65,25 @@ machine, an Overleaf extension, or anything installed into the paper itself.
   in the tray. Then pick the shell you will do the work in:
 
   **A. Ubuntu (WSL2)** — recommended. Every command in this repo runs exactly as
-  written, `$(id -u)` included. Tick *Docker Desktop → Settings → Resources → WSL
-  integration* for Ubuntu, open the Ubuntu shell (Start → Ubuntu, or `wsl` in any
-  terminal), install git there with `sudo apt update && sudo apt install -y git`,
-  and keep the paper under `~/` rather than `/mnt/c` — across that boundary
-  compiles are ~2.5× slower.
+  written, `$(id -u)` included. `wsl --install` above already installed Ubuntu;
+  if WSL was on the machine before, or you skipped the distribution, add it:
+
+  ```powershell
+  wsl --list --verbose            # what is installed, and on which WSL version
+  wsl --install -d Ubuntu         # if it is not there
+  ```
+
+  The first launch asks you to pick a Linux username and password — they are
+  new, unrelated to your Windows account. Then tick *Docker Desktop → Settings →
+  Resources → WSL integration* for Ubuntu, and in the Ubuntu shell (Start →
+  Ubuntu, or `wsl` in any terminal):
+
+  ```bash
+  sudo apt update && sudo apt install -y git
+  ```
+
+  Keep the paper under `~/` rather than `/mnt/c` — across that boundary compiles
+  are ~2.5× slower.
 
   **B. PowerShell** — no Ubuntu needed (Docker runs in its own `docker-desktop`
   distribution, so `wsl --install --no-distribution` is enough) and no
@@ -109,9 +134,24 @@ against. `ls` should show your manuscript; the main file is usually `main.tex`,
 and if yours is called something else, note the name — the compile takes it as
 an argument.
 
-Putting the token in the URL writes it to `.git/config` in the clear. It is a
-revocable token rather than a password, but you can leave it out and let git
-prompt instead.
+**Where the token ends up.** Written into the clone URL, it is saved in
+`<my-paper>/.git/config` as part of the remote address — in plain text, inside
+the paper directory, readable by anything that can read your files. Nowhere
+else: not in your shell history beyond the one command, and it is never
+committed, because `.git/config` is not part of the repository content and does
+not sync to Overleaf. Every later `git pull` and `git push` reuses it, which is
+why you do not get asked again.
+
+```bash
+git remote -v                       # shows the remote, token and all
+git remote set-url overleaf https://git@git.overleaf.com/<PROJECT_ID>
+```
+
+The second line takes it back out; git then asks for it at each push, and a
+credential helper can remember it instead. Either way it is a token scoped to
+your Overleaf account, revocable at
+<https://www.overleaf.com/user/settings> — which is what to do if it leaks, or
+if you hand the machine on.
 
 Detail: **[docs/pairing.md](docs/pairing.md)** — keeping the token off disk,
 older projects on `master`, attaching to a directory that already has files.
