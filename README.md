@@ -65,25 +65,11 @@ machine, an Overleaf extension, or anything installed into the paper itself.
   in the tray. Then pick the shell you will do the work in:
 
   **A. Ubuntu (WSL2)** — recommended. Every command in this repo runs exactly as
-  written, `$(id -u)` included. `wsl --install` above already installed Ubuntu;
-  if WSL was on the machine before, or you skipped the distribution, add it:
-
-  ```powershell
-  wsl --list --verbose            # what is installed, and on which WSL version
-  wsl --install -d Ubuntu         # if it is not there
-  ```
-
-  The first launch asks you to pick a Linux username and password — they are
-  new, unrelated to your Windows account. Then tick *Docker Desktop → Settings →
-  Resources → WSL integration* for Ubuntu, and in the Ubuntu shell (Start →
-  Ubuntu, or `wsl` in any terminal):
-
-  ```bash
-  sudo apt update && sudo apt install -y git
-  ```
-
-  Keep the paper under `~/` rather than `/mnt/c` — across that boundary compiles
-  are ~2.5× slower.
+  written, `$(id -u)` included. Tick *Docker Desktop → Settings → Resources → WSL
+  integration* for Ubuntu, open the Ubuntu shell (Start → Ubuntu, or `wsl` in any
+  terminal), install git there with `sudo apt update && sudo apt install -y git`,
+  and keep the paper under `~/` rather than `/mnt/c` — across that boundary
+  compiles are ~2.5× slower.
 
   **B. PowerShell** — no Ubuntu needed (Docker runs in its own `docker-desktop`
   distribution, so `wsl --install --no-distribution` is enough) and no
