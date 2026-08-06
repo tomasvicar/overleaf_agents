@@ -1,7 +1,8 @@
 # TeX Live packages installed on top of scheme-basic.
 #
 # Keep this list as small as it can be while still compiling real manuscripts.
-# Blank lines and #-comments are ignored.
+# Blank lines and #-comments are ignored. A comment must be on its own line --
+# every other line is passed to tlmgr verbatim.
 #
 # If a paper needs something that is not here:
 #   1. add it below, open a PR -> CI rebuilds and pushes a new image, or
@@ -19,25 +20,40 @@ biber
 biblatex
 natbib
 bibtex
+apacite
 
 # --- maths and units ---------------------------------------------------------
 amsmath
 mathtools
 siunitx
 physics
-bm
-upgreek
+# upgreek.sty ships in `was`. bm.sty, subcaption.sty, rotating.sty and
+# mathptmx.sty are not package names of their own -- they arrive with tools,
+# caption, graphics and psnfss respectively, so they are not listed here.
+was
+cancel
+esint
+# esint ships its fonts as METAFONT sources only, and the image deletes
+# fonts/source -- without the Type1 companion, \oiint fails at the font stage
+esint-type1
+stmaryrd
+braket
+nicematrix
+thmtools
+optidef
+mhchem
+# doublestroke provides dsfont.sty (\mathds)
+doublestroke
 
 # --- floats, tables, captions ------------------------------------------------
 caption
-subcaption
 booktabs
 multirow
 threeparttable
 tabularray
+makecell
 float
 wrapfig
-rotating
 adjustbox
 placeins
 
@@ -46,6 +62,7 @@ geometry
 setspace
 lineno
 enumitem
+paralist
 titlesec
 fancyhdr
 lastpage
@@ -61,6 +78,28 @@ todonotes
 changes
 pdfpages
 pdflscape
+footmisc
+appendix
+titling
+tocloft
+framed
+tcolorbox
+lipsum
+blindtext
+# preprint provides authblk.sty (\author + \affil) and balance.sty
+preprint
+
+# --- multi-file manuscripts --------------------------------------------------
+subfiles
+import
+
+# --- acronyms, glossaries, indexes -------------------------------------------
+glossaries
+acronym
+nomencl
+# bigfoot provides suffix.sty, which glossaries, acronym and nicematrix all
+# require without declaring it
+bigfoot
 
 # --- cross-referencing -------------------------------------------------------
 cleveref
@@ -81,10 +120,14 @@ txfonts
 helvetic
 courier
 times
-mathptmx
 cm-super
 type1cm
 sansmath
+# libertine and inconsolata are acmart's body and mono fonts. Without them
+# acmart only warns and falls back, so the paper still compiles but paginates
+# differently from Overleaf -- which matters when there is a page limit.
+libertine
+inconsolata
 
 # --- journal document classes ------------------------------------------------
 revtex
@@ -92,8 +135,22 @@ elsarticle
 ieeetran
 achemso
 acmart
-siamltex
-copernicus
+# acmart loads these but does not declare them as dependencies
+totpages
+environ
+ifmtarg
+ncctools
+upquote
+llncs
+# Not here on purpose: siamltex and copernicus are not in TeX Live at all --
+# SIAM and Copernicus ship their class with the template, so the file arrives
+# in the project itself and compiles without anything being installed.
+
+# --- languages ---------------------------------------------------------------
+# babel-czech/-slovak and their hyphenation patterns. Other languages come in
+# the same shape -- collection-langgerman, collection-langfrench, and so on,
+# 1-3 MB each -- so add the ones your group actually writes in.
+collection-langczechslovak
 
 # --- graphics helpers --------------------------------------------------------
 pgf
@@ -102,3 +159,18 @@ standalone
 transparent
 epstopdf
 epstopdf-pkg
+circuitikz
+tikz-cd
+overpic
+# eepic provides epic.sty, which overpic requires and does not declare
+eepic
+# \includesvg additionally needs Inkscape, which is not in the image. The
+# package is here so that a document merely loading it still compiles.
+svg
+
+# --- tools the review workflow uses ------------------------------------------
+# latexdiff produces the marked-up PDF that stands in for Overleaf's track
+# changes; texcount checks a journal's word limit; chktex lints.
+latexdiff
+texcount
+chktex

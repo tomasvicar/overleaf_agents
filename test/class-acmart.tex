@@ -1,0 +1,21 @@
+% acmart is the one class in packages.txt that needs more than itself: four
+% undeclared dependencies (totpages, environ, ifmtarg, ncctools) and its body
+% and mono fonts (libertine, inconsolata). Without the fonts it does not fail
+% -- it warns and falls back, and the paper paginates differently from
+% Overleaf. This file is here so that stops being invisible.
+\documentclass[sigconf,nonacm]{acmart}
+
+\title{Class smoke test}
+\author{CI}
+\affiliation{%
+  \institution{Continuous Integration}
+  \country{Nowhere}
+}
+
+\begin{document}
+\maketitle
+
+\section{Body}
+A paragraph, so the class has something to typeset.
+
+\end{document}

@@ -27,6 +27,17 @@ docker run --rm ghcr.io/tomasvicar/latex-overleaf:latest \
 The output lists the containing package, e.g. `datetime2: texmf-dist/tex/latex/datetime2/datetime2.sty`
 means the package name is `datetime2`. <https://ctan.org/pkg/foo> works too.
 
+Two things this step protects you from, both of which have bitten this list:
+
+- **The file name is often not the package name.** `upgreek.sty` comes from
+  `was`, `subcaption.sty` from `caption`, `epic.sty` from `eepic`,
+  `authblk.sty` from `preprint`. Guessing produces an entry that installs
+  nothing.
+- **Some classes are not in TeX Live at all** — `siamltex`, `copernicus` and a
+  number of other publishers' classes ship inside the journal's template, so
+  the `.cls` arrives in the project itself. There is nothing to install, and
+  adding the name to `packages.txt` only fails the build.
+
 ---
 
 ## Step 2, quick version: extend the image on your machine
@@ -92,6 +103,13 @@ silently disappearing in a later rebuild. Add a line to
 
 Now CI fails if the package ever stops being installed, instead of the failure
 surfacing in someone's manuscript months later.
+
+For a document class, add `test/class-<name>.tex` instead — a three-line
+manuscript that loads it. CI compiles every `test/*.tex` by name. This is worth
+the extra file: a class can pull in packages it never declares as dependencies,
+so the only way to know it still works is to typeset something with it. That is
+exactly how `acmart` sat in `packages.txt` for a while without being able to
+compile.
 
 ### 4. Push
 

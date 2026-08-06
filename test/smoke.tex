@@ -34,12 +34,53 @@
 
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
+\usepackage{svg}
+\usepackage{overpic}
+\usepackage{tikz-cd}
+\usepackage{circuitikz}
+
+% Packages a manuscript reaches for once it stops being a template. Loading
+% them is most of the test: a missing .sty fails the build here rather than in
+% someone's paper. apacite is deliberately absent -- it is incompatible with
+% natbib, which this file already exercises.
+% shorthands=off is not decoration: several languages, Czech among them, make
+% `-` an active character, and an active `-` breaks \cmidrule(lr){2-3} and
+% anything else that parses a range.
+\usepackage[main=english,czech,shorthands=off]{babel}
+\usepackage[bottom]{footmisc}
+\usepackage{upgreek}
+% titling has to come before authblk: loaded the other way round it restores
+% the standard \author and the [1] below is typeset as text.
+\usepackage{titling}
+\usepackage{authblk}
+\usepackage{tocloft}
+\usepackage{paralist}
+\usepackage{framed}
+\usepackage{tcolorbox}
+\usepackage{makecell}
+\usepackage{nicematrix}
+\usepackage{stmaryrd}
+\usepackage{cancel}
+\usepackage{esint}
+\usepackage{braket}
+\usepackage{dsfont}
+\usepackage{mhchem}
+\usepackage{thmtools}
+\usepackage{acronym}
+\usepackage{glossaries}
+\usepackage{nomencl}
+\usepackage{subfiles}
+\usepackage{import}
+\usepackage{lipsum}
+\usepackage{blindtext}
+\usepackage{appendix}
 
 \doublespacing
 \linenumbers
 
 \title{Smoke test manuscript}
-\author{CI \orcidlink{0000-0002-1825-0097}}
+\author[1]{CI \orcidlink{0000-0002-1825-0097}}
+\affil[1]{Continuous Integration, Nowhere}
 
 \begin{document}
 \maketitle
@@ -113,7 +154,47 @@ with $\bm{v}$ the velocity field. \Cref{eq:shear} is referenced through
   \end{algorithmic}
 \end{algorithm}
 
+\section{Prose, notation and a second language}
+
+\begin{acronym}
+  \acro{CI}{continuous integration}
+\end{acronym}
+
+Run under \ac{CI}.\footnote{Set at the bottom of the page by \texttt{footmisc}.}
+Hyphenation patterns for a second language load through \texttt{babel}:
+\foreignlanguage{czech}{příliš žluťoučký kůň úpěl ďábelské ódy}.
+
+\begin{compactitem}
+  \item $\mathds{R}$, $\llbracket 0,1 \rrbracket$, $\Braket{\psi | \phi}$ and
+        $\cancel{x}$, from \texttt{dsfont}, \texttt{stmaryrd},
+        \texttt{braket} and \texttt{cancel}.
+  \item $\oiint_{\partial\Omega}$ and $\upmu$, from \texttt{esint} and
+        \texttt{upgreek}.
+  \item \ce{CO2 + H2O -> H2CO3}, from \texttt{mhchem}.
+\end{compactitem}
+
+\begin{framed}
+  \noindent A framed paragraph, and \texttt{tcolorbox} loaded alongside it.
+\end{framed}
+
+\begin{table}[H]
+  \centering
+  \caption{A \texttt{makecell} header over a \texttt{nicematrix} body.}
+  \begin{tabular}{lc}
+    \toprule
+    \makecell{Two-line\\header} & Value \\
+    \midrule
+    $A$ & $\begin{pNiceMatrix} 1 & 0 \\ 0 & 1 \end{pNiceMatrix}$ \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
 \bibliographystyle{plainnat}
 \bibliography{smoke}
+
+\begin{appendices}
+\section{An appendix}
+\lipsum[1][1-3]
+\end{appendices}
 
 \end{document}

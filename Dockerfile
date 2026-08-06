@@ -41,6 +41,10 @@ RUN ln -s "$(echo /usr/local/texlive/${TL_YEAR}/bin/*)" /usr/local/texlive/bin
 # The packages the manuscripts actually need. tlmgr keeps going after an unknown
 # package name, so verify afterwards and report every bad name at once rather
 # than one per rebuild.
+#
+# The check has to read `installed: Yes` out of the output: `tlmgr info` exits 0
+# for a name that does not exist in the repository at all, so testing its exit
+# status alone silently accepts typos.
 COPY packages.txt /tmp/packages.txt
 RUN set -eu; \
     repo="${TL_REPO}/${TL_YEAR}/tlnet-final"; \
@@ -48,7 +52,8 @@ RUN set -eu; \
     tlmgr --repository="${repo}" install ${pkgs} || true; \
     missing=""; \
     for p in ${pkgs}; do \
-      tlmgr info --only-installed "$p" >/dev/null 2>&1 || missing="${missing} ${p}"; \
+      tlmgr info --only-installed "$p" 2>/dev/null \
+        | grep -qE '^installed:[[:space:]]*Yes' || missing="${missing} ${p}"; \
     done; \
     if [ -n "${missing}" ]; then \
       echo "ERROR: these packages.txt entries do not exist in TeX Live ${TL_YEAR}:" >&2; \
@@ -59,6 +64,11 @@ RUN set -eu; \
 
 # Drop everything that cannot affect a compile: docs, sources, unused binaries
 # and the installer's own backup/log clutter.
+#
+# `fonts/source` is the one line here with a catch: a package whose fonts exist
+# only as METAFONT sources can no longer generate them, and fails at the font
+# stage rather than with a missing .sty. Add its `<package>-type1` companion to
+# packages.txt when that happens -- see `esint` there.
 RUN set -eux; \
     tldir="/usr/local/texlive/${TL_YEAR}"; \
     rm -rf "${tldir}/texmf-dist/doc" \
