@@ -403,13 +403,14 @@
     </p>
     <p class="coords">
       <a href="https://github.com/tomasvicar/overleaf_agents">github.com/tomasvicar/overleaf_agents</a>
-      &nbsp;·&nbsp; <code>ghcr.io/tomasvicar/latex-overleaf:latest</code>
+      &nbsp;·&nbsp; <code>ghcr.io/tomasvicar/latex-overleaf:TL2025</code>
     </p>
     <div class="facts">
       <span class="fact"><b>647 MB</b> rozbaleně</span>
       <span class="fact"><b>300 MB</b> přes síť</span>
       <span class="fact">TeX Live <b>2025</b></span>
       <span class="fact">amd64 + arm64</span>
+      <span class="fact">Linux · macOS · Windows</span>
       <span class="fact">stav: <b>publikováno</b> na GHCR</span>
     </div>
   </header>
@@ -431,6 +432,12 @@
       Image je záměrně malý: <code>scheme-basic</code> plus kurátorovaný seznam balíčků. To je
       jediné místo, kde se od Overleafu liší — ten jede TeX Live <em>full</em>.
     </p>
+    <p>
+      Proto se všude v repu píše rokový tag <code>:TL2025</code>, ne <code>:latest</code>.
+      <code>:latest</code> se posune na nový ročník ve chvíli, kdy se posune tenhle repo — což je
+      přesně to, co pinning nemá dělat. Publikované jsou dva tagy, <code>TL2025</code> a
+      <code>latest</code>, a dneska ukazují na tentýž image; příští rok už ne.
+    </p>
   </section>
 
   <section>
@@ -439,7 +446,7 @@
     <figure>
       <div class="figbox">
         <svg viewBox="0 0 900 250" role="img"
-             aria-label="Pipeline: zdrojové soubory jdou do Dockerfilu, CI staví amd64 image, spustí smoke test, a teprve když projde, pushne multi-arch image na GHCR.">
+             aria-label="Pipeline: zdrojové soubory jdou do Dockerfilu, CI staví amd64 image, přeloží jím deset testovacích manuskriptů, a teprve když projdou, pushne multi-arch image na GHCR.">
           <defs>
             <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5"
                     markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -478,8 +485,9 @@
 
           <!-- smoke gate -->
           <rect class="svg-fill svg-accent" x="578" y="46" width="132" height="66" rx="3" stroke-width="1.5"/>
-          <text class="svg-label" x="644" y="72" text-anchor="middle">smoke test</text>
-          <text class="svg-sub"   x="644" y="90" text-anchor="middle">test/smoke.tex</text>
+          <text class="svg-label" x="644" y="66" text-anchor="middle">testy</text>
+          <text class="svg-sub"   x="644" y="84" text-anchor="middle">10× test/*.tex</text>
+          <text class="svg-sub"   x="644" y="100" text-anchor="middle">+ 3 nástroje</text>
 
           <line x1="716" y1="79" x2="754" y2="79" stroke="currentColor" stroke-width="1.5" marker-end="url(#ar)"/>
           <text class="svg-accent-t" x="735" y="70" text-anchor="middle">projde</text>
@@ -502,9 +510,14 @@
         </svg>
       </div>
       <figcaption>
-        Publikace je podmíněná smoke testem: CI nejdřív postaví jen amd64, přeloží jím ukázkový
-        manuskript, a teprve pak staví a pushuje multi-arch. Rozdělení Dockerfilu na dvě vrstvy
-        znamená, že editace <code>packages.txt</code> nestahuje celý TeX Live znovu.
+        Publikace je podmíněná testy: CI nejdřív postaví jen amd64 a přeloží jím <strong>všech
+        deset manuskriptů</strong> z <code>test/</code> — šest šablon časopisů (IEEEtran, acmart,
+        elsarticle, llncs, revtex, achemso), obě bibliografické cesty (natbib + bibtex,
+        biblatex + biber, apacite) a soubor, který sahá na každý balíček ze seznamu. Pak ověří, že
+        v image opravdu jsou <code>latexdiff</code>, <code>texcount</code> a <code>chktex</code> —
+        ty jsou binárky, takže jejich zmizení by žádný překlad nezachytil. Teprve potom se staví a
+        pushuje multi-arch. Rozdělení Dockerfilu na dvě vrstvy znamená, že editace
+        <code>packages.txt</code> nestahuje celý TeX Live znovu.
       </figcaption>
     </figure>
   </section>
@@ -576,16 +589,26 @@
     </figure>
 
     <h3>Jednou za paper</h3>
-    <pre><code><span class="cmt"># token: Overleaf → Account Settings → Git Integration (placená funkce)</span>
-git clone https://git@git.overleaf.com/&lt;PROJECT_ID&gt; my-paper
+    <pre><code><span class="cmt"># token: Overleaf → Account Settings → Git Integration</span>
+git clone https://git:&lt;TOKEN&gt;@git.overleaf.com/&lt;PROJECT_ID&gt; &lt;my-paper&gt;
+cd &lt;my-paper&gt;
 git remote rename origin overleaf
 
 <span class="cmt"># GitHub je volitelný — Overleaf sám o sobě je platný setup</span>
-git remote add origin git@github.com:&lt;you&gt;/&lt;repo&gt;.git</code></pre>
+gh repo create &lt;repo&gt; --private --source=. --push</code></pre>
+
+    <p>
+      Git bridge je <strong>placená funkce vázaná na vlastníka projektu</strong>, ne na tebe:
+      projekt, který ti nasdílí kolega s předplatným, jde naklonovat i z free účtu. Nefunguje jen
+      vlastní projekt na free účtu — tam žádný remote není. Token skončí v čitelné podobě
+      v <code>&lt;my-paper&gt;/.git/config</code>, nikde jinde; do repa se nedostane a na Overleaf
+      se nesynchronizuje.
+    </p>
 
     <h3>Pak už jen tohle</h3>
-    <pre><code>docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
-  ghcr.io/tomasvicar/latex-overleaf:latest
+    <pre><code>git pull overleaf main --no-rebase
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:TL2025
 
 git add -A &amp;&amp; git commit -m "…"
 git push overleaf main
@@ -604,8 +627,54 @@ git remote | grep -q '^origin$' &amp;&amp; git push origin main</code></pre>
     </p>
     <p>
       Přes <code>-e</code> jde přepnout <code>ENGINE=xelatex|lualatex</code>,
-      <code>SHELL_ESCAPE=1</code> a <code>OUTDIR</code>. Jiný hlavní soubor se předá jako argument
-      za jménem image.
+      <code>SHELL_ESCAPE=1</code> a <code>OUTDIR</code>.
+    </p>
+    <p>
+      Hlavní soubor se hledá ve třech krocích: argument za jménem image vyhrává, jinak
+      <code>main.tex</code>, jinak jediný <code>.tex</code> v kořeni, který má
+      <code>\documentclass</code>. Takže <code>manuscript.tex</code> se přeloží bez jakéhokoli
+      argumentu; <code>sections/*.tex</code> do toho nevstupují, protože hledání není rekurzivní.
+      Dva kandidáti se nehádají — kontejner je vypíše a skončí. <strong>PDF se ale jmenuje podle
+      zdroje</strong>, takže do <code>.gitignore</code> patří <code>/manuscript.pdf</code>;
+      všude opisovaný <code>/main.pdf</code> by nesedl, přeložené PDF by odteklo na Overleaf a
+      konfliktovalo tam při každém buildu.
+    </p>
+  </section>
+
+  <section>
+    <h2>Windows</h2>
+    <p>
+      Původně tu stálo jen „Docker Desktop s WSL2 backendem". Ověřování na reálném Windows 11
+      (build 26200, WSL 2.7.11, Docker Desktop 29.6.2) to opravilo na třech místech, a všechna tři
+      jsou teď v <a href="windows.md">windows.md</a>.
+    </p>
+    <p>
+      <strong>WSL2 jde první, ne Docker.</strong> Docker Desktop ho uvádí jako prerekvizitu a sám
+      ho nezapíná — pořadí je <code>wsl --install</code> (administrátorská PowerShell, restart),
+      teprve pak <code>winget install -e --id Docker.DockerDesktop</code>. Na Windows 11 a
+      Windows 10 2004+ ten první příkaz zapne i potřebné Windows features. Co zapnout nemůže, je
+      virtualizace v BIOSu/UEFI: pády <code>0x80370102</code> a <code>0x80070003</code> jsou tohle.
+    </p>
+    <p>
+      <strong>Použitelné shelly jsou dva, ne čtyři.</strong> Ubuntu ve WSL2 je doporučené — každý
+      příkaz z repa funguje doslova, <code>$(id -u)</code> včetně. PowerShell funguje taky a
+      potřebuje toho <em>míň</em>, ne víc: žádnou Ubuntu distribuci (Docker si veze vlastní
+      <code>docker-desktop</code>) a žádný integration toggle. Platí se za to jen tvarem příkazu —
+      vypustit <code>-u</code> a psát <code>-v "${PWD}:/work"</code>. Výsledné PDF je bajt po bajtu
+      stejné jako z Linuxu. Git Bash a <code>cmd.exe</code> podporované nejsou.
+    </p>
+    <p>
+      <strong>Kde soubory leží, je vidět na času.</strong> Stejný manuskript, tři čisté překlady:
+      <b>11 s z filesystemu WSL2 proti 29 s z <code>/mnt/c</code></b>, tedy zhruba 2,5×. Absolutní
+      čísla patří tomu stroji, poměr cestuje — a roste s počtem souborů, kterých se překlad dotkne,
+      což je přesně to, co dělá bibliografie a adresář obrázků.
+    </p>
+    <p>
+      Zbytek jsou pasti kolem symlinků a konců řádků: Git for Windows má
+      <code>core.symlinks=false</code>, takže commitnutý symlink se vyklonuje jako devítibajtový
+      textový soubor s obsahem <code>AGENTS.md</code> — a agent, který ho čte, najde tohle místo
+      instrukcí. Proto: <strong>je-li kdokoli na paperu na Windows, commitni dva opravdové
+      soubory.</strong> Tahle past je jediná, která kousne i lidi, co na Windows nejsou.
     </p>
   </section>
 
@@ -625,7 +694,7 @@ git remote | grep -q '^origin$' &amp;&amp; git push origin main</code></pre>
           </tr>
           <tr>
             <td><code>packages.txt</code></td>
-            <td>Zhruba 60 balíčků nad <code>scheme-basic</code>. Jediné místo, kde se rozšiřuje
+            <td>Zhruba 120 balíčků nad <code>scheme-basic</code>. Jediné místo, kde se rozšiřuje
                 pokrytí. Každá položka se po instalaci ověřuje zvlášť.</td>
           </tr>
           <tr>
@@ -640,18 +709,27 @@ git remote | grep -q '^origin$' &amp;&amp; git push origin main</code></pre>
                 relevantní řádky logu.</td>
           </tr>
           <tr>
-            <td><code>test/smoke.tex</code></td>
-            <td>Regresní test — realistický manuskript. Když přestane jít přeložit, image přišel
-                o balíček.</td>
+            <td><code>test/</code></td>
+            <td>Deset regresních manuskriptů: šablony šesti časopisů, obě bibliografické cesty a
+                soubor sahající na každý balíček ze seznamu. Když jeden přestane jít přeložit,
+                image přišel o balíček — a ví se který.</td>
           </tr>
           <tr>
             <td><code>.github/workflows/<wbr>image.yml</code></td>
-            <td>Build amd64 → smoke test → push multi-arch na GHCR. Měsíční cron kvůli Debian
+            <td>Build amd64 → testy → push multi-arch na GHCR. Měsíční cron kvůli Debian
                 security updatům.</td>
           </tr>
           <tr>
             <td><code>README.md</code></td>
-            <td>Pro člověka: token → clone → jeden příkaz.</td>
+            <td>Pro člověka, a jen to, co člověk opravdu čte: quickstart 0–3 (Docker → clone →
+                agent → volitelný GitHub), každodenní příkazy a tabulka „když to spadne, tohle to
+                je". Detaily jsou za odkazy do <code>docs/</code>.</td>
+          </tr>
+          <tr>
+            <td><code>docs/</code></td>
+            <td>Sedm stránek pro to, co se do README nevešlo: párování s Overleafem, kompilace,
+                Windows, práce s agentem, přidávání balíčků, upstream TeX Live image a tipy ke
+                psaní paperu v gitu.</td>
           </tr>
           <tr>
             <td><code>AGENTS.snippet.md</code></td>
@@ -668,6 +746,61 @@ git remote | grep -q '^origin$' &amp;&amp; git push origin main</code></pre>
   </section>
 
   <section>
+    <h2>Co je v dokumentaci</h2>
+    <p>
+      README zůstalo krátké schválně — je to to, co člověk přečte, než poprvé něco spustí. Všechno
+      ostatní je za odkazem, aby se quickstart nedal utopit v odbočkách.
+    </p>
+    <div class="tablewrap">
+      <table>
+        <thead>
+          <tr><th>Stránka</th><th>Co v ní je</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code><a href="tips.md">tips.md</a></code></td>
+            <td>Nejdelší a nejužitečnější. Vede tím, že <strong>agentovi je potřeba dát
+                kontext</strong> — kód, který vyrobil obrázky, CSV za tabulkami, poznámky,
+                reviewer comments, pokyny časopisu — vedle repa, ne do něj, a agenta pustit o
+                úroveň výš. Dál: komentáře přes <code>\todo{}</code> a <code>changes</code> (past
+                s <code>[final,obeyFinal]</code>), <code>latexdiff</code> místo track changes, věta
+                na řádek, <code>pre-push</code> hook, který nejdřív zkompiluje.</td>
+          </tr>
+          <tr>
+            <td><code><a href="pairing.md">pairing.md</a></code></td>
+            <td>Token a project ID, klonování i připojení remote k adresáři, který už není prázdný,
+                staré projekty na <code>master</code>, <code>.gitignore</code>.</td>
+          </tr>
+          <tr>
+            <td><code><a href="compiling.md">compiling.md</a></code></td>
+            <td>Jiný hlavní soubor, XeLaTeX/LuaLaTeX, shell-escape, který tag zvolit, rootless
+                podman a SELinux, čtení spadlého překladu. A proč tam není minted.</td>
+          </tr>
+          <tr>
+            <td><code><a href="windows.md">windows.md</a></code></td>
+            <td>Instalace WSL2 a Dockeru v pořadí, které funguje, dva podporované shelly a čtyři
+                pasti — všechno proměřené na reálném stroji.</td>
+          </tr>
+          <tr>
+            <td><code><a href="working-with-agents.md">working-with-agents.md</a></code></td>
+            <td>Rozložení adresářů kolem paperu a prompty, které stojí za ukradení.</td>
+          </tr>
+          <tr>
+            <td><code><a href="adding-packages.md">adding-packages.md</a></code></td>
+            <td>Jak zjistit, který balíček dodává danou <code>.sty</code>, a jak rozšířit nebo
+                forknout image.</td>
+          </tr>
+          <tr>
+            <td><code><a href="using-upstream-texlive.md">using-upstream-texlive.md</a></code></td>
+            <td>Upstream TeX Live <em>full</em> jako alternativa: 2,6 GB, bez arm64, zato se otázka
+                chybějících balíčků nikdy neptá.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
     <h2>Proč ne MCP server</h2>
     <p>
       Ptal ses, jestli to řešit přes skill nebo MCP server. MCP dává agentovi schopnosti, které
@@ -677,8 +810,10 @@ git remote | grep -q '^origin$' &amp;&amp; git push origin main</code></pre>
     <p>
       Nosičem je proto obyčejný markdown v paper repu, pod dvěma jmény:
       <code>AGENTS.md</code> pro Codex, Gemini CLI a většinu ostatních, <code>CLAUDE.md</code> pro
-      Claude Code. Symlink jednoho na druhý je udrží v souladu — na Windows bez developer mode
-      se soubor prostě zkopíruje dvakrát. Skill je nad tím jen tenká vrstva pro pohodlí. Pravidla, která agent dostává: kompiluj
+      Claude Code. Symlink jednoho na druhý je udrží v souladu — ale jen tam, kde symlinky
+      přežijí: Git for Windows commitnutý symlink vyklonuje jako textový soubor s obsahem
+      <code>AGENTS.md</code>, takže s kýmkoli na Windows se commitují dva opravdové soubory.
+      Skill je nad tím jen tenká vrstva pro pohodlí. Pravidla, která agent dostává: kompiluj
       v kontejneru a ne na hostu, čti <em>první</em> chybu z logu, chybějící <code>.sty</code>
       znamená chybějící balíček v image a <strong>ne</strong> důvod přepisovat manuskript, před
       pushem na Overleaf vždycky zkompiluj, nikdy neforcuj a při odmítnutém pushi
@@ -690,19 +825,28 @@ git remote | grep -q '^origin$' &amp;&amp; git push origin main</code></pre>
     <h2>Co je ověřené reálným během</h2>
     <ul class="checks">
       <li>Build projde; 647 MB rozbaleně, 300 MB přes síť</li>
-      <li>GitHub Actions: build i smoke test na čistém runneru, 22 min</li>
+      <li>GitHub Actions: build i všechny testy na čistém runneru, ~30 min</li>
       <li>Image na GHCR jde stáhnout <strong>bez tokenu</strong></li>
       <li>Manifest obsahuje amd64 i arm64</li>
       <li>Staženým image přeložený manuskript: PDF na bajt stejné jako lokálně</li>
-      <li>Smoke test dá dvoustránkové PDF</li>
-      <li>siunitx, cleveref, subcaption, natbib + bibtex, pgfplots, algorithmicx</li>
+      <li>Deset testovacích manuskriptů se překládá při každém buildu</li>
+      <li>Šablony IEEEtran, acmart, elsarticle, llncs, revtex, achemso</li>
+      <li>natbib + bibtex, biblatex + biber, apacite</li>
+      <li>siunitx, cleveref, subcaption, pgfplots, algorithmicx</li>
+      <li><code>latexdiff</code>, <code>texcount</code>, <code>chktex</code> mají vlastní kontrolu</li>
       <li>Autodetekce hlavního souboru podle <code>\documentclass</code></li>
+      <li>Jiné jméno než <code>main.tex</code>: PDF se jmenuje podle zdroje</li>
+      <li>Dva kandidáti na hlavní soubor: vypíše je a skončí, nehádá</li>
       <li>Chybová cesta vypíše první chybu a vrátí nenulový kód</li>
       <li>Docker s <code>-u</code>: výstupy vlastní správný uživatel</li>
       <li>Rootless podman bez <code>-u</code>, s <code>:Z</code>: totéž</li>
       <li>Escape hatch <code>bash</code> / <code>tlmgr</code> funguje</li>
       <li>pdfTeX 1.40.28 (TL2025), latexmk 4.87, biber 2.21</li>
       <li>Rozšíření image o balíček navíc projde</li>
+      <li>Windows 11 + WSL2: Ubuntu i PowerShell, PDF bajtově shodné</li>
+      <li>Windows: <code>/mnt/c</code> 29 s proti 11 s z WSL2 filesystemu</li>
+      <li>Git Bash přepisuje <code>/work</code> a tiše kopíruje místo symlinku</li>
+      <li>Na GHCR jsou opravdu jen tagy <code>TL2025</code> a <code>latest</code></li>
     </ul>
   </section>
 
@@ -747,8 +891,10 @@ git remote | grep -q '^origin$' &amp;&amp; git push origin main</code></pre>
     <ol class="todo">
       <li>
         Nakopírovat <code>AGENTS.snippet.md</code> do paper repa jako <code>AGENTS.md</code>
-        a <code>CLAUDE.md</code> (symlink stačí) a přidat <code>build/</code> a aux přípony do
-        <code>.gitignore</code>. Tím je paper repo hotový — nic dalšího do něj nepřibude.
+        a <code>CLAUDE.md</code> (symlink stačí, pokud nikdo na paperu nejede na Windows) a přidat
+        <code>build/</code>, aux přípony a jméno přeloženého PDF do <code>.gitignore</code>. Tím je
+        paper repo hotový — nic dalšího do něj nepřibude. Tohle je přesně ten krok, který podle
+        README udělá agent, když ho v naklonovaném adresáři pustíš na tenhle repo.
       </li>
       <li>
         Zkontrolovat TeX Live rok v Overleaf projektu a srovnat ho s image. Když se rozejdou,
@@ -763,8 +909,10 @@ git remote | grep -q '^origin$' &amp;&amp; git push origin main</code></pre>
   </section>
 
   <div class="footer">
-    Zamrzlé („historic") repozitáře TeX Live jsou důvod, proč staré tagy budou fungovat i za rok:
-    <code>:TL2024</code> se instaluje z archivu, který se už nemění.
+    Zamrzlé („historic") repozitáře TeX Live jsou důvod, proč rokové tagy budou fungovat i za rok:
+    <code>:TL2025</code> se instaluje z archivu, který se už nemění. Starší ročníky publikované
+    nejsou — <code>docker build --build-arg TL_YEAR=2024 .</code> si je postaví z téhož archivu,
+    ale CI tu cestu netestuje.
   </div>
 
 </div>
