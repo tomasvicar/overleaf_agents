@@ -249,8 +249,9 @@ And one that is not Windows-specific but only bites there: **do not commit the
 `CLAUDE.md` symlink if anyone on the paper uses Windows.** Git for Windows also
 defaults to `core.symlinks=false`, so a symlink stored in the repository checks
 out as a 9-byte text file containing the string `AGENTS.md` — and an agent
-reading it finds that, instead of your instructions. Two real files, or a
-`.gitattributes` marking the path, are the only things that survive the trip.
+reading it finds that, instead of your instructions. Two real files are the only
+thing that survives the trip; `core.symlinks=true` can be turned on per clone,
+but it is not something you can impose on a co-author from inside the repo.
 
 ### podman, and Fedora/RHEL
 
