@@ -5,7 +5,8 @@ handful of git commands that keep the local clone, GitHub and Overleaf in sync.
 
 There is nothing to install and nothing to configure in your paper repository —
 no devcontainer, no `.env`, no wrapper script, no VS Code extension. You need
-`git` and `docker` (or `podman`), and the command below.
+`git` and `docker` (or `podman`), and the command below. On Windows that means
+Docker Desktop with the WSL2 backend; see [Windows](#windows).
 
 ```bash
 docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
@@ -186,6 +187,40 @@ Then it is just `paper`.
 | Aux files somewhere else | add `-e OUTDIR=.aux` |
 | A shell inside the image | `... latex-overleaf:latest bash` |
 | A specific TeX Live year | use tag `:TL2024` instead of `:latest` |
+
+### Windows
+
+**Docker Desktop with the WSL2 backend** — its default — is the whole
+requirement. Install it and let it turn WSL2 on. Hyper-V mode and "Windows
+containers" are not it: this is a Linux image.
+
+Then **do the work inside WSL2**. Open the Ubuntu shell, keep the paper under
+`~/`, and every command in this README works exactly as written, `$(id -u)`
+included. A paper under `/mnt/c/...` also compiles, but bind mounts across the
+Windows filesystem boundary are several times slower — on a manuscript with a
+bibliography that is the difference between a two-second and a twenty-second
+rebuild.
+
+If you would rather stay in PowerShell, drop `-u`; there are no Linux uids to
+give it, and Docker Desktop maps ownership for you:
+
+```powershell
+docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:latest
+```
+
+In `cmd.exe` the mount is `-v "%cd%:/work"` instead.
+
+Three traps, all of them Windows-specific:
+
+- **Git Bash rewrites container paths.** MSYS turns `/work` into
+  `C:/Program Files/Git/work` before Docker sees it, and the compile stops with
+  *no main.tex ... is the project directory mounted at /work?*. Prefix the
+  command with `MSYS_NO_PATHCONV=1`, or write the container side as `//work`.
+- **Symlinks need Developer Mode.** `ln -s AGENTS.md CLAUDE.md` fails without
+  it. Copy the file twice instead, and remember edits have to go into both.
+- **Line endings.** Overleaf stores LF. Set `git config core.autocrlf input` in
+  the paper repo so nothing ever commits CRLF into it — otherwise a co-author
+  sees a diff touching every line of a file you changed one word in.
 
 ### podman, and Fedora/RHEL
 
