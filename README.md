@@ -39,20 +39,23 @@ machine, an Overleaf extension, or anything installed into the paper itself.
 - **macOS** — Docker Desktop,
   <https://docs.docker.com/desktop/setup/install/mac-install/>. Apple Silicon
   runs the native `arm64` image.
-- **Windows** — Docker Desktop with the **WSL2 backend**,
-  <https://docs.docker.com/desktop/setup/install/windows-install/>. New to WSL?
-  <https://learn.microsoft.com/windows/wsl/install>. Then work in one of two
-  shells:
+- **Windows** — **WSL2 first**, then Docker Desktop. Docker treats WSL2 as a
+  prerequisite and does not turn it on for you: run `wsl --install` in an
+  administrator PowerShell and reboot
+  (<https://learn.microsoft.com/windows/wsl/install>), then install Docker
+  Desktop and accept the WSL2 backend
+  (<https://docs.docker.com/desktop/setup/install/windows-install/>). Then work
+  in one of two shells:
 
   1. **Ubuntu (WSL2)** — recommended. Every command in this repo runs exactly as
-     written, `$(id -u)` included. Needs *Docker Desktop → Settings → Resources
-     → WSL integration* switched on for the distribution, and the paper kept
-     under `~/` rather than `/mnt/c` — across that boundary compiles are ~2.5×
-     slower.
-  2. **PowerShell** — drop `-u`, and write the mount as `"${PWD}:/work"`.
-     Docker Desktop puts `docker` on the Windows PATH by itself, so this needs
-     no WSL integration toggle — but it still runs on the WSL2 backend
-     underneath, and you still need Git for Windows for the `git` half.
+     written, `$(id -u)` included. Needs the Ubuntu that `wsl --install` gives
+     you, *Docker Desktop → Settings → Resources → WSL integration* switched on
+     for it, and the paper kept under `~/` rather than `/mnt/c` — across that
+     boundary compiles are ~2.5× slower.
+  2. **PowerShell** — drop `-u`, and write the mount as `"${PWD}:/work"`. No
+     Linux distribution needed at all (Docker runs in its own `docker-desktop`
+     one) and no integration toggle — `docker` is on the Windows PATH as soon as
+     Docker Desktop runs. You do need Git for Windows for the `git` half.
 
   Not Git Bash: it rewrites the container path and the compile fails to find
   your `.tex`.

@@ -9,7 +9,9 @@ Docker Desktop 29.6.2.
 
 ## Installing, if you have not used WSL or Docker before
 
-1. **WSL2 and a Linux distribution.** In an *administrator* PowerShell:
+1. **WSL2 and a Linux distribution.** This comes first: Docker Desktop lists
+   WSL2 as a prerequisite and does not enable it for you. In an *administrator*
+   PowerShell:
 
    ```powershell
    wsl --install
@@ -19,6 +21,11 @@ Docker Desktop 29.6.2.
    Ubuntu asks you to pick a username and password — unrelated to your Windows
    account. Microsoft's page, if anything goes sideways:
    <https://learn.microsoft.com/windows/wsl/install>
+
+   If you intend to stay in PowerShell, `wsl --install --no-distribution` is
+   enough — Docker Desktop brings its own `docker-desktop` distribution and does
+   not need Ubuntu. Installing Ubuntu anyway costs a few hundred MB and keeps
+   the better option open.
 
    On an older Windows 10 the virtualisation features may need turning on
    separately; that page covers it, and it is the one thing here that can need
@@ -85,12 +92,14 @@ docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:latest
 Verified: it writes `main.pdf` beside the source, byte-identical to the one the
 Linux command produces, readable and writable from Windows afterwards.
 
-Docker is the same single install either way — Docker Desktop, WSL2 backend, as
-in step 2 above. It adds `docker` to the Windows PATH on its own, so from
-PowerShell you can skip the WSL-integration toggle that step 2 needs; the
-containers still run on WSL2 underneath, there is just no Linux shell in front
-of them. What you do need here is **Git for Windows**, since the `git` half of
-the workflow has no Ubuntu to live in.
+Docker is the same single install either way — Docker Desktop on the WSL2
+backend, as in the install steps above, WSL2 turned on first because Docker will
+not do it for you. From PowerShell you then need *less* than for shell 1: no
+Ubuntu (Docker runs its own `docker-desktop` distribution) and no WSL
+integration toggle, because Docker Desktop puts `docker` on the Windows PATH by
+itself. The containers still run on WSL2 underneath — there is just no Linux
+shell in front of them. What you do need here is **Git for Windows**, since the
+`git` half of the workflow has no Ubuntu to live in.
 
 In 2 the paper lives on the Windows filesystem and is bind-mounted across the
 same boundary `/mnt/c` crosses, so expect the same penalty — that one was
