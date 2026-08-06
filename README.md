@@ -528,7 +528,9 @@ packages.txt                   the package list — edit this to add a package
 texlive.profile                install-tl profile (scheme-basic, no docs/sources)
 compile-paper                  image entrypoint: latexmk wrapper + error summary
 test/smoke.tex                 representative manuscript compiled by CI
-test/class-*.tex               journal classes that need more than themselves
+test/class-*.tex               one file per journal class packages.txt promises
+test/packages-extra.tex        the packages smoke.tex does not otherwise reach
+test/bib-*.tex                 biblatex/biber and apacite, which natbib excludes
 .github/workflows/image.yml    build, smoke test, push multi-arch to GHCR
 AGENTS.snippet.md              paste-into-your-paper-repo instructions for agents
 skills/overleaf-paper/         optional Claude Code slash command

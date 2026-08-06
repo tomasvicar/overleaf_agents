@@ -1,0 +1,52 @@
+% The packages in packages.txt that the smoke manuscript does not otherwise
+% reach. Loading them is the point: a missing .sty, or a package that cannot
+% initialise at all, fails here instead of in someone's paper. Anything that
+% conflicts with what smoke.tex already loads lives in its own file.
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage{physics}
+\usepackage{optidef}
+\usepackage{threeparttable}
+\usepackage{tabularray}
+\usepackage{wrapfig}
+\usepackage{adjustbox}
+\usepackage{placeins}
+\usepackage{titlesec}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{soul}
+\usepackage{ulem}
+\usepackage{csquotes}
+\usepackage{xstring}
+\usepackage{xpatch}
+\usepackage{comment}
+\usepackage{pdfpages}
+\usepackage{pdflscape}
+\usepackage{sansmath}
+\usepackage{standalone}
+\usepackage{transparent}
+\usepackage{algorithm2e}
+\usepackage{xurl}
+\usepackage{hyperref}
+\usepackage{hyperxmp}
+\usepackage{doi}
+
+\begin{document}
+\section{Body}
+Loaded: \enquote{csquotes}, \so{soul}, \emph{\uline{ulem}}, and
+$\dv{f}{x}$ from \texttt{physics}. Page \pageref{LastPage} of \pageref{LastPage}.
+
+\begin{table}[h]
+  \centering
+  \begin{tblr}{ll}
+    tabularray & row \\
+  \end{tblr}
+\end{table}
+
+\begin{algorithm}[H]
+  \caption{From algorithm2e}
+  \KwResult{a result}
+\end{algorithm}
+
+\end{document}

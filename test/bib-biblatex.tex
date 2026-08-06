@@ -1,0 +1,12 @@
+% biblatex driven by biber, which nothing else in test/ runs. natbib, which
+% smoke.tex uses, cannot coexist with it -- hence a file of its own.
+\documentclass{article}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{smoke.bib}
+
+\begin{document}
+\section{Body}
+A citation \autocite{knuth1984}, resolved by biber.
+
+\printbibliography
+\end{document}

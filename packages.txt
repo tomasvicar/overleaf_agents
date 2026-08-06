@@ -171,6 +171,18 @@ eepic
 # package is here so that a document merely loading it still compiles.
 svg
 
+# --- undeclared dependencies of the above ------------------------------------
+# Each of these is required by something already on this list and declared by
+# none of them: xifthen by optidef, svn-prov by standalone, ifoddpage and
+# relsize by algorithm2e, ninecolors by tabularray as soon as a tblr
+# environment is actually used. Without them those packages fail on load or on
+# first use, which is why test/ now exercises every one of them.
+xifthen
+svn-prov
+ifoddpage
+relsize
+ninecolors
+
 # --- tools the review workflow uses ------------------------------------------
 # latexdiff produces the marked-up PDF that stands in for Overleaf's track
 # changes; texcount checks a journal's word limit; chktex lints.
