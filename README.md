@@ -21,7 +21,18 @@ docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
 
 ---
 
-## Prerequisites
+## Quick start
+
+Set-up is a one-off: install Docker (**0**), let an agent lay the directory out
+(**1**), connect it to your Overleaf project (**2**). Step **3** is optional.
+Fifteen minutes, most of it downloads. After that you are in
+[Everyday commands](#everyday-commands).
+
+### 0) Prerequisites
+
+You need `git`, `docker`, and an Overleaf **paid plan** — the git integration
+this builds on is a paid-plan feature. You do *not* need TeX Live on your
+machine, an Overleaf extension, or anything installed into the paper itself.
 
 - **Linux** — Docker Engine, <https://docs.docker.com/engine/install/>. Rootless
   podman also works: drop `-u`, and add `:Z` to the mount on SELinux systems.
@@ -29,18 +40,29 @@ docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
   <https://docs.docker.com/desktop/setup/install/mac-install/>. Apple Silicon
   runs the native `arm64` image.
 - **Windows** — Docker Desktop with the **WSL2 backend**, then work inside the
-  Ubuntu shell. New to WSL? <https://learn.microsoft.com/windows/wsl/install>
-  and <https://docs.docker.com/desktop/setup/install/windows-install/>.
-- **An Overleaf paid plan** — the git integration this builds on is a paid-plan
-  feature.
+  Ubuntu shell — not PowerShell. New to WSL?
+  <https://learn.microsoft.com/windows/wsl/install> and
+  <https://docs.docker.com/desktop/setup/install/windows-install/>.
+
+Check both are there before going on; the second line should print a hello
+message and exit:
+
+```bash
+git --version
+docker run --rm hello-world
+```
 
 Detail: **[docs/windows.md](docs/windows.md)** — install steps and four
 Windows-specific traps.
 
-## Quick start with an agent
+### 1) Let an agent set the directory up
 
-Open a coding agent — Claude Code, Codex, Gemini CLI — in the directory you want
-the paper in, and give it one line:
+Make an **empty** directory for the paper, open a coding agent — Claude Code,
+Codex, Gemini CLI — in it, and give it one line:
+
+```bash
+mkdir my-paper && cd my-paper
+```
 
 > Set this directory up as an Overleaf-linked paper repository following
 > <https://github.com/tomasvicar/overleaf_agents>, and tell me how to pair it
@@ -48,19 +70,26 @@ the paper in, and give it one line:
 
 - It reads this repo for the rest: which files to copy in, which image to pull,
   what the remote should be called.
-- Then pair the project yourself, below — rather than handing your Overleaf
-  token to an agent.
-- After that it is one conversation: *fix the overfull boxes in section 3,
-  rebuild, push to Overleaf*.
+- What it should end up doing: pull `ghcr.io/tomasvicar/latex-overleaf:latest`,
+  copy [`AGENTS.snippet.md`](AGENTS.snippet.md) in as `AGENTS.md` **and**
+  `CLAUDE.md`, and write a `.gitignore` with `build/`, the aux patterns and
+  `/main.pdf`.
+- Do not give it your Overleaf token — step 2 is yours.
 
-## Pairing with Overleaf
+No agent? Do those three things by hand; nothing here needs one.
+
+### 2) Connect the directory to your Overleaf project
+
+Two values, both from Overleaf, both collected by you:
 
 - **Token** — <https://www.overleaf.com/user/settings> → **Git integration** →
   **Generate token**. Copy it at once; Overleaf will not show it again. It is
-  the password on the git remote, your account password is not.
+  the password on the git remote — your account password is not.
 - **Project ID** — the hex string in the project URL,
   `overleaf.com/project/<PROJECT_ID>`. The project's **Integrations → Git**
   dialog also shows the whole clone command with the ID in it.
+
+If the directory is still empty, one clone does it:
 
 ```bash
 git clone https://git:<TOKEN>@git.overleaf.com/<PROJECT_ID> my-paper
@@ -68,15 +97,52 @@ cd my-paper
 git remote rename origin overleaf
 ```
 
-- Then copy [`AGENTS.snippet.md`](AGENTS.snippet.md) in as `AGENTS.md` (and
-  `CLAUDE.md`), substitute the project ID, and put `build/`, the aux patterns
-  and `/main.pdf` in `.gitignore`.
+If step 1 already put files there, `git clone` refuses — attach the remote to
+what is there instead:
 
-Detail: **[docs/pairing.md](docs/pairing.md)** — attaching to a directory that
-already has files, projects on `master`, GitHub as a second remote, the full
-`.gitignore`.
+```bash
+git init -b main
+git remote add overleaf https://git:<TOKEN>@git.overleaf.com/<PROJECT_ID>
+git fetch overleaf
+git branch -f main overleaf/main
+git symbolic-ref HEAD refs/heads/main
+git reset --hard main       # overwrites same-named local files — copy them aside first
+git branch --set-upstream-to=overleaf/main main
+```
+
+Either way the Overleaf side is now the remote called `overleaf`. Check it
+worked — the manuscript is here and it builds:
+
+```bash
+ls main.tex
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:latest
+```
+
+Detail: **[docs/pairing.md](docs/pairing.md)** — keeping the token off disk,
+older projects on `master`, the full `.gitignore`.
+
+### 3) Optional: add GitHub as a second remote
+
+Overleaf alone is a complete setup — skip this and everything below still works.
+GitHub buys you history browsing, branches, pull requests and CI, which the
+Overleaf git bridge has none of. The cost is one extra push per change.
+
+```bash
+git remote add origin git@github.com:<you>/<repo>.git
+git push -u origin main
+```
+
+Keep the repo **private** if the paper is unpublished — and note `AGENTS.md`
+carries your project ID once it is substituted in.
+
+Detail: **[docs/pairing.md#adding-github-as-a-second-remote](docs/pairing.md)**.
 
 ## Everyday commands
+
+Set-up is done; from here it is one conversation with the agent — *fix the
+overfull boxes in section 3, rebuild, push to Overleaf* — and these five lines
+underneath it.
 
 ```bash
 git pull overleaf main --no-rebase        # before starting, and after a rejected push
