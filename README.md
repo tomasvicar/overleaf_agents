@@ -41,8 +41,8 @@ machine, an Overleaf extension, or anything installed into the paper itself.
   runs the native `arm64` image.
 - **Windows** — Docker Desktop with the **WSL2 backend**,
   <https://docs.docker.com/desktop/setup/install/windows-install/>. New to WSL?
-  <https://learn.microsoft.com/windows/wsl/install>. Then pick a shell — all
-  four work, they differ in what the compile line looks like:
+  <https://learn.microsoft.com/windows/wsl/install>. Then work in one of two
+  shells:
 
   1. **Ubuntu (WSL2)** — recommended. Every command in this repo runs exactly as
      written, `$(id -u)` included. Needs *Docker Desktop → Settings → Resources
@@ -51,10 +51,9 @@ machine, an Overleaf extension, or anything installed into the paper itself.
      slower.
   2. **PowerShell** — drop `-u`, and write the mount as `"${PWD}:/work"`.
      Nothing to install beyond Git for Windows.
-  3. **cmd.exe** — as 2, with the mount as `-v "%cd%:/work"`.
-  4. **Git Bash** — as 2, plus `MSYS_NO_PATHCONV=1` in front of the command, or
-     the container path `/work` is rewritten to a Windows one and the compile
-     cannot find your `.tex`.
+
+  Not Git Bash: it rewrites the container path and the compile fails to find
+  your `.tex`.
 
 Check both are there before going on; the second line should print a hello
 message and exit:

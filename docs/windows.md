@@ -58,10 +58,10 @@ says the same thing at greater length:
 Access your Linux files from Explorer with `\\wsl$\Ubuntu\home\<you>`, or type
 `explorer.exe .` in the Ubuntu shell.
 
-## The four shells, and what each needs
+## The two shells, and what each needs
 
-All four compile the paper. They differ only in the compile line, and in where
-the files sit.
+Use one of these two. They differ only in the compile line, and in where the
+files sit.
 
 **1. Ubuntu (WSL2)** — recommended, and the only one where the commands in this
 repo need no adjusting at all:
@@ -86,16 +86,15 @@ Verified: it writes `main.pdf` beside the source, byte-identical to the one the
 Linux command produces, readable and writable from Windows afterwards. Needs
 Git for Windows for the `git` half of the workflow.
 
-**3. `cmd.exe`** — as PowerShell, with the mount written `-v "%cd%:/work"`.
-
-**4. Git Bash** — as PowerShell, plus `MSYS_NO_PATHCONV=1` in front of the
-command; see the first trap below for why. Two of the four traps are Git Bash's
-alone, which is the reason it is last on this list rather than first.
-
-In 2–4 the paper lives on the Windows filesystem and is bind-mounted across the
+In 2 the paper lives on the Windows filesystem and is bind-mounted across the
 same boundary `/mnt/c` crosses, so expect the same penalty — that one was
-measured from inside WSL2, not from each shell in turn. It is the price of
+measured from inside WSL2, not from PowerShell in turn. It is the price of
 keeping the files on `C:`, not a property of the shell.
+
+**Not Git Bash**, and not `cmd.exe`. Git Bash rewrites the container path out
+from under Docker (first trap below) and lies to you about symlinks (second),
+and `cmd.exe` needs its own mount syntax to buy you nothing PowerShell does not
+already do. Neither is worth carrying as a supported path.
 
 ## Four traps
 
@@ -104,8 +103,9 @@ All four checked on a real machine, not inferred.
 **Git Bash rewrites container paths.** MSYS turns `/work` into
 `C:/Program Files/Git/work` before Docker ever sees it — verbatim, that is what
 `cmd //c echo /work` prints — and the compile stops with *no main.tex ... is the
-project directory mounted at /work?*. Prefix the command with
-`MSYS_NO_PATHCONV=1`, or write the container side as `//work`.
+project directory mounted at /work?*. That is the error to recognise if you end
+up there; `MSYS_NO_PATHCONV=1` in front of the command, or `//work` as the
+container side, gets you out of it once.
 
 **`ln -s` does not fail — it silently copies.** In Git Bash,
 `ln -s AGENTS.md CLAUDE.md` exits 0 and leaves you a *second regular file*.
