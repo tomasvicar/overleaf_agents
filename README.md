@@ -44,7 +44,7 @@ TeX Live's frozen *historic* repository, so "it compiles locally" is a
 meaningful statement about whether it will compile on Overleaf.
 
 The image is deliberately small — `scheme-basic` plus the package list in
-[`packages.txt`](packages.txt) — which puts it at 549 MB unpacked, about 260 MB
+[`packages.txt`](packages.txt) — which puts it at 647 MB unpacked, about 300 MB
 over the wire, against roughly 2.6 GB for a full TeX Live image. It is also
 built for `arm64` as well as `amd64`, which `texlive/texlive` is not.
 That is the one place where it differs from Overleaf, which ships TeX Live
@@ -183,10 +183,18 @@ Then it is just `paper`.
 |---|---|
 | A differently named main file | `... latex-overleaf:latest manuscript.tex` |
 | XeLaTeX / LuaLaTeX | add `-e ENGINE=xelatex` (or `lualatex`) |
-| `\write18` / minted / gnuplot | add `-e SHELL_ESCAPE=1` |
+| `\write18` / gnuplot / shell-escape | add `-e SHELL_ESCAPE=1` |
 | Aux files somewhere else | add `-e OUTDIR=.aux` |
 | A shell inside the image | `... latex-overleaf:latest bash` |
 | A specific TeX Live year | use tag `:TL2024` instead of `:latest` |
+
+`minted` is the one common package deliberately left out: it shells out to
+Pygments, so it needs a Python installation in the image as well as the
+package, and that is a bigger thing to carry than one syntax highlighter is
+worth. `listings` is installed and needs no shell escape. If you must have
+`minted`, the [upstream TeX Live image](#or-have-no-missing-packages-at-all-the-upstream-tex-live-image)
+does not solve it either — layer `python3` and `pygments` on top of whichever
+image you use.
 
 ### Windows
 
@@ -378,7 +386,7 @@ Match the year to **Menu → Settings → TeX Live version** in your project;
 `TL2021-historic` through `TL2025-historic` exist. Using `latest` throws away
 the parity that makes a local compile mean anything.
 
-What it costs is 2.6 GB over the wire against 260 MB, and **no `arm64` build**:
+What it costs is 2.6 GB over the wire against 300 MB, and **no `arm64` build**:
 on an Apple Silicon Mac it runs under emulation, several times slower, which is
 the main reason this project's image exists at all. On Linux and Windows/WSL2
 it is a perfectly reasonable choice — arguably the better one if image size

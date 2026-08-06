@@ -23,7 +23,7 @@ That is TeX Live **full**. Every package Overleaf has, it has. The entire
 
 ## What it costs
 
-**Size.** 2.6 GB over the wire, roughly 6 GB unpacked, against 260 MB / 549 MB
+**Size.** 2.6 GB over the wire, roughly 6 GB unpacked, against 300 MB / 647 MB
 for this project's image. A one-time download, but a slow one.
 
 **No Apple Silicon.** This is the part that decides it for most people:
