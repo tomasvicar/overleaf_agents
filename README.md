@@ -37,18 +37,52 @@ has to be done once per package, for everyone.
 
 ## Setup, once per paper
 
+### The short path: hand it to an agent
+
+If you already have a coding agent in your terminal — Claude Code, Codex,
+Gemini CLI, Cursor — it can do all of the setup below. Open it in the directory
+you want the paper in and paste this, with your two values filled in:
+
+> Set this directory up as an Overleaf-linked paper repository, following the
+> README at <https://github.com/tomasvicar/overleaf_agents>.
+>
+> 1. Pair it with my Overleaf project: ID `<PROJECT_ID>`, git token `<TOKEN>`.
+>    Name the Overleaf remote `overleaf`. Do not add a GitHub remote.
+> 2. Copy that repository's `AGENTS.snippet.md` in as `AGENTS.md`, symlink
+>    `CLAUDE.md` to it, and keep the link to the upstream repository at the top
+>    of it, so the next person can see where these instructions came from.
+> 3. Add the `.gitignore` for aux files that its README gives.
+> 4. Pull `ghcr.io/tomasvicar/latex-overleaf:latest` and compile the project
+>    with it. If it does not build, show me the first error.
+>
+> Do not commit or push anything yet — I want to look first.
+
+Everything after that is the same conversation: *fix the overfull boxes in
+section 3, rebuild, push to Overleaf*.
+
+The two values in step 1 are yours to fetch; an agent cannot get them for you.
+
 ### 1. Get an Overleaf git token
 
-Overleaf → **Account Settings → Git Integration → Generate token**. Copy it now;
-Overleaf will not show it again.
+**Account Settings → Git integration → Generate token**, at
+<https://www.overleaf.com/user/settings>. Copy it now — Overleaf will not show
+it again. The token is the only thing accepted as the password on the git
+remote; your Overleaf account password is not.
 
-> Overleaf's git integration is a **paid-plan feature**. Without it there is no
-> git remote to clone and this workflow does not apply.
+> Overleaf's git integration is a **paid-plan feature** (Overleaf Cloud
+> Standard/Professional, or Server Pro). Without it there is no git remote to
+> clone and this workflow does not apply.
 
-### 2. Clone the Overleaf project
+### 2. Find the project ID
 
-The project ID is the hex string in the Overleaf URL
-(`overleaf.com/project/<ID>`).
+It is the hex string in the project URL, `overleaf.com/project/<PROJECT_ID>`.
+
+Overleaf will also spell out the whole clone command for you: open the project
+and choose **Git** under the **Integrations** button in the left sidebar (in
+the older interface, **Menu → Git**). The dialog shows the clone URL with the
+ID already in it.
+
+### 3. Clone the Overleaf project
 
 ```bash
 git clone https://git@git.overleaf.com/<PROJECT_ID> my-paper
@@ -63,12 +97,36 @@ the remote URL:
 git remote set-url overleaf https://git:<TOKEN>@git.overleaf.com/<PROJECT_ID>
 ```
 
+That writes the token to `.git/config` in the clear. It is a token scoped to
+your Overleaf account, not a password, and it can be revoked from the same
+settings page — but if you would rather it not sit on disk, leave the URL
+without it and let git prompt, or use a credential helper.
+
 Renaming the remote to `overleaf` right away is worth the extra line: it keeps
 one name for the Overleaf side whether or not you ever add GitHub, so every
 instruction below — and every instruction the agent gets — reads the same in
 both setups.
 
-### 3. Optional: add GitHub as a second remote
+**If the directory is not empty** — you already put an `AGENTS.md` or a
+`.gitignore` there — `git clone` refuses. Attach the remote to what is already
+there instead:
+
+```bash
+git init -b main
+git remote add overleaf https://git:<TOKEN>@git.overleaf.com/<PROJECT_ID>
+git fetch overleaf
+git branch -f main overleaf/main
+git symbolic-ref HEAD refs/heads/main
+git reset --hard main                        # see the warning below
+git branch --set-upstream-to=overleaf/main main
+```
+
+`git reset --hard` leaves your untracked files alone *unless* the Overleaf
+project has a file of the same name, which it silently overwrites — copy
+anything you care about aside first. Older Overleaf projects use `master`
+rather than `main`; `git branch -r` after the fetch tells you which.
+
+### 4. Optional: add GitHub as a second remote
 
 Overleaf alone is a complete setup. If that is what you want, skip this step;
 `overleaf` is your only remote and everything still works.
@@ -81,7 +139,7 @@ git remote add origin git@github.com:<you>/<repo>.git
 git push -u origin main
 ```
 
-### 4. Keep aux files out of git
+### 5. Keep aux files out of git
 
 Overleaf will happily sync `.aux` and `.fls` files into the project and they
 cause pointless merge conflicts. Add to `.gitignore`:
@@ -96,7 +154,13 @@ build/
 *.synctex.gz
 *.bbl
 *.blg
+/main.pdf
 ```
+
+The last line is the PDF this image writes to the repo root. Overleaf compiles
+its own copy, so committing yours only produces a binary conflict on every
+build. Keep it out unless you specifically want the PDF browsable on GitHub —
+and note that `*.pdf` would be wrong here, since figures are often PDFs.
 
 ---
 
@@ -163,6 +227,83 @@ If `overleaf` is your only remote, drop the last line; nothing else changes.
 
 ---
 
+## Reviewing, comments and change tracking
+
+The git bridge moves files. That is worth saying out loud, because two of the
+things people rely on in Overleaf are not files:
+
+- **Comment threads** and **track changes** live in Overleaf's database. Clone
+  the project and they are not in it. An agent working in the clone cannot read
+  a reviewer's comment, and nothing it commits can answer one.
+- **Overleaf's own history** is not the git history either. The two run
+  alongside each other and neither summarises the other.
+
+So decide once where review happens. If the answer is "in the browser, in
+comment threads", that is a legitimate choice — and this workflow is then the
+wrong tool for that paper.
+
+### Comments that survive the round trip
+
+Put them in the source, where both sides can see them:
+
+| Form | What it gets you |
+|---|---|
+| `% an ordinary TeX comment` | Invisible in the PDF. Fine for a note to whoever edits the source next, useless to a co-author who only ever reads the PDF. |
+| `\todo{is this the Aug run?}` (`todonotes`) | Renders in the margin of the compiled PDF, so a browser-only co-author sees it on Overleaf without doing anything. |
+| `\added{}`, `\deleted{}`, `\replaced{}` (`changes`) | Marks up who changed what, in the PDF, and `\listofchanges` collects them. The closest thing to track changes that is made of text. |
+
+Both packages are in the image. Neither has to be stripped before submission:
+`\usepackage[final]{todonotes}` and `\usepackage[final]{changes}` make the
+markup vanish without deleting any of it.
+
+One thing to ask of co-authors: if they are editing in the browser with track
+changes on, have them accept or reject before you pull. What the bridge hands
+you is the document text — "this part is a pending tracked change" is not
+something a git commit can carry.
+
+### The git history *is* the change tracking
+
+`git log`, `git show` and `git diff` are the record, and in the ways that
+matter they beat Overleaf's history: they have messages, they are per-change
+rather than per-keystroke, and an agent can read them. Ask *what changed in
+section 4 since Monday* and it answers from `git log`.
+
+For co-authors who want to *see* the changes, hand them a marked-up PDF.
+`latexdiff` is in the image:
+
+```bash
+git show HEAD~5:main.tex > old.tex
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:latest latexdiff old.tex main.tex > diff.tex
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:latest diff.tex
+```
+
+`diff.pdf` comes out with additions underlined and deletions struck through.
+Any two revisions work — five commits back, a tag, the commit you last sent
+someone. Attaching that to "I revised the discussion" is a better review round
+than a comment thread, and the agent can produce it on request.
+
+Two more things in the image, for the same reason: `texcount` (`texcount -1
+-sum main.tex`) when the journal has a word limit, and `chktex` for linting.
+
+### Does GitHub issues make sense?
+
+If you added the GitHub remote: yes, with one condition.
+
+Issues and pull requests are a real review surface — threaded, assignable, and
+readable by an agent (`gh issue list`, `gh pr view`), which is exactly what
+Overleaf's comments are not. Branch per revision round, open a PR, review the
+diff, merge, then one push to Overleaf: that holds together, and it gives the
+agent somewhere to write down what it did.
+
+The condition is that your co-authors will actually open GitHub. For a paper
+with three clinicians on it they will not, and pushing it costs more than it
+buys. Then `\todo{}` in the PDF is the honest answer, and GitHub stays what it
+is anyway — your history and your backup.
+
+---
+
 ## Missing packages
 
 A missing `.sty` is not a problem with your manuscript — do not rewrite the
@@ -187,10 +328,39 @@ which package provides a given `.sty`, and how to fork this repo so CI builds
 and publishes an image with your package in it — a real tag your co-authors can
 pull, rather than something that exists only on your machine.
 
-If you would rather never deal with a missing package again, and you are not on
-an Apple Silicon Mac, **[docs/using-upstream-texlive.md](docs/using-upstream-texlive.md)**
-describes using the upstream full TeX Live image instead of this one, and what
-that trades away.
+### Or have no missing packages at all: the upstream TeX Live image
+
+The TeX Live project publishes its own images, pinned to the same frozen
+historic releases this one builds from — and they are TeX Live **full**, which
+is what Overleaf runs. Every package Overleaf has, they have. No `packages.txt`
+to maintain, no fork, no missing `.sty` ever again:
+
+```bash
+docker run --rm -v "$PWD:/work" -w /work \
+  -u "$(id -u):$(id -g)" -e HOME=/tmp \
+  texlive/texlive:TL2025-historic \
+  latexmk -pdf -interaction=nonstopmode -halt-on-error -file-line-error \
+          -outdir=build main.tex
+```
+
+Match the year to **Menu → Settings → TeX Live version** in your project;
+`TL2021-historic` through `TL2025-historic` exist. Using `latest` throws away
+the parity that makes a local compile mean anything.
+
+What it costs is 2.6 GB over the wire against 260 MB, and **no `arm64` build**:
+on an Apple Silicon Mac it runs under emulation, several times slower, which is
+the main reason this project's image exists at all. On Linux and Windows/WSL2
+it is a perfectly reasonable choice — arguably the better one if image size
+does not bother you. You also lose the `compile-paper` entrypoint, and with it
+the main-file autodetection, the error summary and the ownership fix.
+
+**[docs/using-upstream-texlive.md](docs/using-upstream-texlive.md)** has the
+rest: layering the entrypoint back on with a two-line Dockerfile, and the flags
+above explained.
+
+Whichever image you settle on, the `docker run` line in your paper's
+`AGENTS.md` has to match it — an agent following the default instructions will
+otherwise pull the small image and hit the exact package you were avoiding.
 
 ---
 
@@ -218,6 +388,89 @@ If you want a `/paper` slash command in Claude Code on top of that, copy
 `~/.claude/skills/overleaf-paper/` — it is a convenience layer over the same
 commands, not a separate mechanism.
 
+### Keep the link back to here
+
+The snippet's first line links to this repository. Leave it in the copy that
+ends up in your paper. Months later, when the image is missing a package or the
+TeX Live year has moved on, that line is what tells whoever is looking — a
+co-author, a fresh agent, you — where these instructions came from and where a
+fix belongs. A paper repo with a bare `docker run ghcr.io/...` in it and no
+explanation is a small mystery you will have to solve twice.
+
+### Give it the rest of the project
+
+The paper repository has to stay exactly what Overleaf sees, so your analysis
+code does not belong in it. Put it next door and start the agent one level up:
+
+```
+project/
+  paper/      <- the Overleaf clone; the only thing that gets pushed
+  analysis/   <- the code that produced the numbers, and its outputs
+  notes/      <- lab notes, meeting minutes, reviewer emails
+```
+
+From `project/` the agent can read all three and still only ever commit inside
+`paper/`. That is the difference between an agent that rewords your sentences
+and one that can tell you the number in the abstract is not the number the
+script printed.
+
+What it buys, concretely:
+
+> Read `analysis/results/summary.csv` and `notes/2026-07-lab-meeting.md`, then
+> draft the Results section. Every number must come from the CSV — put the
+> column you took it from in a `%` comment beside it. Invent nothing; if a
+> number you need is missing, list it at the end instead.
+
+and later, when the numbers move:
+
+> `analysis/` reran overnight. Compare `results/summary.csv` against the values
+> currently in section 4, list every one that changed, update the text, rebuild,
+> and show me a latexdiff against HEAD before anything is pushed.
+
+Where you can, make generated tables genuinely generated: have the analysis
+script write `paper/tables/results.tex` and `\input{}` it, so a rerun updates
+the manuscript instead of starting an argument about which number is current.
+
+### Examples worth stealing
+
+Proofreading, the thing most worth handing over:
+
+> Proofread `main.tex`: typos, agreement, tense consistency, and any notation
+> used two different ways. Do not change the meaning, the structure, or the
+> references. Show me the list of edits first; then compile in the container,
+> and if it builds, commit and push to Overleaf.
+
+Note the order. The edits are shown before they are pushed, and the compile
+happens before the push rather than after it. `AGENTS.md` already says as much,
+but repeating it in the prompt costs nothing.
+
+A round of reviewer comments:
+
+> Reviewer 2's comments are in `notes/review-r2.md`. For each one either make
+> the change or write one sentence saying why not, keeping
+> `notes/response-to-reviewers.md` as you go. Mark every paragraph you touched
+> with `\todo{R2.3}` so I can find them. Rebuild, then stop — do not push.
+
+And the one that lets it clean up after itself:
+
+> Compile. If it fails, read `build/main.log`, fix the first error only, and
+> compile again. Do not edit the .cls file. Stop after three attempts and show
+> me the log.
+
+### Small things that pay off
+
+- `git config pull.rebase false` in the paper repo. Overleaf's commits must
+  never be rebased, and this makes the safe behaviour the default for everyone
+  and everything working in that clone, agents included.
+- A `pre-push` hook that compiles first. Two lines, and it removes the only
+  really embarrassing failure mode — a broken build visible to every co-author.
+- `echo '*.tex diff=tex' >> .gitattributes`. Git then labels diff hunks with the
+  section they are in, which makes both `git diff` and the agent's reading of it
+  markedly better.
+- Commit messages in the imperative, one change each. They are the change log
+  you will be reading back to co-authors, and the thing the agent summarises
+  when you ask what happened last week.
+
 ---
 
 ## Repository layout
@@ -228,6 +481,7 @@ packages.txt                   the package list — edit this to add a package
 texlive.profile                install-tl profile (scheme-basic, no docs/sources)
 compile-paper                  image entrypoint: latexmk wrapper + error summary
 test/smoke.tex                 representative manuscript compiled by CI
+test/class-*.tex               journal classes that need more than themselves
 .github/workflows/image.yml    build, smoke test, push multi-arch to GHCR
 AGENTS.snippet.md              paste-into-your-paper-repo instructions for agents
 skills/overleaf-paper/         optional Claude Code slash command

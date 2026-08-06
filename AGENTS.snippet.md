@@ -11,6 +11,10 @@ mode, copy the file twice and remember to edit both.
 Replace <PROJECT_ID> and delete anything that does not apply.
 -->
 
+These instructions come from <https://github.com/tomasvicar/overleaf_agents>.
+Keep that link here: it is where the compile image, the TeX Live package list,
+and any fix to either of them live.
+
 ## Building the paper
 
 Compile in the pinned container — do not install TeX Live and do not try to run
@@ -69,9 +73,42 @@ Rules that matter:
 - If an `origin` remote exists, push there too, or the two drift apart. Do not
   add one on your own initiative — Overleaf-only is a valid setup.
 
+## Comments and review
+
+Overleaf's comment threads and track changes live in Overleaf's database, not
+in the files. They do not arrive with a clone, and a commit cannot answer one.
+Leave anything that needs saying in the source instead:
+
+- `\todo{...}` (`todonotes`) renders in the PDF margin, which is the only place
+  a co-author working in the browser will see it. A plain `%` comment reaches
+  whoever edits the source next, and nobody else.
+- Mark substantive rewrites with `changes`: `\added{}`, `\deleted{}`,
+  `\replaced{}`. `\usepackage[final]{...}` hides either package's markup for
+  submission without deleting any of it.
+
+To show what changed between two revisions, build the marked-up PDF rather than
+describing it in prose:
+
+```bash
+git show <rev>:main.tex > old.tex
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:latest latexdiff old.tex main.tex > diff.tex
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:latest diff.tex
+```
+
+Delete `old.tex`, `diff.tex` and `diff.pdf` afterwards — they are not part of
+the manuscript and must not be committed. For a journal word limit, run
+`texcount -1 -sum main.tex` through the container the same way.
+
 ## Conventions
 
 - Never edit `*.cls` or `*.bst` files — they are the journal's, and the journal
   will use its own copies anyway.
 - Bibliography entries go in the `.bib` file, never inline in the `.tex`.
 - Figures are referenced by `\label`/`\ref`, never by hardcoded numbers.
+- Everything committed here syncs into the Overleaf project and appears in every
+  co-author's browser. Scratch files, analysis scripts and notes belong outside
+  this repository.
+- Numbers in the text come from the analysis outputs, never from memory. If you
+  cannot find the source for one, say so rather than carrying it forward.

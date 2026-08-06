@@ -68,3 +68,23 @@ git remote | grep -q '^origin$' && git push origin main
 - If the repo has no `overleaf` remote, add it with the project ID from the
   Overleaf URL and the user's git token:
   `git remote add overleaf https://git:TOKEN@git.overleaf.com/PROJECT_ID`
+
+## Show what changed
+
+Overleaf's comments and track changes are not in git and cannot be read or
+answered from here. Leave questions as `\todo{...}` (`todonotes`), which renders
+in the PDF where a browser-only co-author sees it, and mark rewrites with
+`changes` (`\added`, `\deleted`, `\replaced`).
+
+For a marked-up PDF between two revisions, which is what replaces track changes:
+
+```bash
+git show <rev>:main.tex > old.tex
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:latest latexdiff old.tex main.tex > diff.tex
+docker run --rm -v "$PWD:/work" -u "$(id -u):$(id -g)" \
+  ghcr.io/tomasvicar/latex-overleaf:latest diff.tex
+```
+
+Remove `old.tex`, `diff.tex` and `diff.pdf` when done; never commit them.
+`texcount -1 -sum main.tex`, run the same way, answers word-limit questions.
