@@ -39,26 +39,45 @@ machine, an Overleaf extension, or anything installed into the paper itself.
 - **macOS** — Docker Desktop,
   <https://docs.docker.com/desktop/setup/install/mac-install/>. Apple Silicon
   runs the native `arm64` image.
-- **Windows** — **WSL2 first**, then Docker Desktop. Docker treats WSL2 as a
-  prerequisite and does not turn it on for you: run `wsl --install` in an
-  administrator PowerShell and reboot
-  (<https://learn.microsoft.com/windows/wsl/install>), then install Docker
-  Desktop and accept the WSL2 backend
-  (<https://docs.docker.com/desktop/setup/install/windows-install/>). Then work
-  in one of two shells:
+- **Windows** — **WSL2 first, then Docker Desktop**: Docker treats WSL2 as a
+  prerequisite and does not turn it on for you. In an *administrator*
+  PowerShell:
+
+  ```powershell
+  wsl --install                                  # WSL2 + Ubuntu; reboot when it asks
+  winget install -e --id Docker.DockerDesktop    # or the installer from the link below
+  ```
+
+  Start Docker Desktop from the Start menu once and leave it running — the whale
+  in the tray. Then work in one of two shells:
 
   1. **Ubuntu (WSL2)** — recommended. Every command in this repo runs exactly as
-     written, `$(id -u)` included. Needs the Ubuntu that `wsl --install` gives
-     you, *Docker Desktop → Settings → Resources → WSL integration* switched on
-     for it, and the paper kept under `~/` rather than `/mnt/c` — across that
-     boundary compiles are ~2.5× slower.
-  2. **PowerShell** — drop `-u`, and write the mount as `"${PWD}:/work"`. No
-     Linux distribution needed at all (Docker runs in its own `docker-desktop`
-     one) and no integration toggle — `docker` is on the Windows PATH as soon as
-     Docker Desktop runs. You do need Git for Windows for the `git` half.
+     written, `$(id -u)` included. Tick *Docker Desktop → Settings → Resources →
+     WSL integration* for Ubuntu, then in the Ubuntu shell (Start → Ubuntu, or
+     `wsl` in any terminal):
+
+     ```bash
+     sudo apt update && sudo apt install -y git
+     docker run --rm hello-world
+     ```
+
+     Keep the paper under `~/`, not `/mnt/c` — across that boundary compiles are
+     ~2.5× slower.
+  2. **PowerShell** — no Ubuntu needed (Docker runs in its own `docker-desktop`
+     distribution, so `wsl --install --no-distribution` is enough), and no
+     integration toggle. Install git, and drop `-u` from every compile line in
+     this repo, with the mount written `"${PWD}:/work"`:
+
+     ```powershell
+     winget install -e --id Git.Git
+     docker run --rm hello-world
+     docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:latest
+     ```
 
   Not Git Bash: it rewrites the container path and the compile fails to find
-  your `.tex`.
+  your `.tex`. Docker's own install page:
+  <https://docs.docker.com/desktop/setup/install/windows-install/>; Microsoft on
+  WSL: <https://learn.microsoft.com/windows/wsl/install>.
 
 Check both are there before going on; the second line should print a hello
 message and exit:

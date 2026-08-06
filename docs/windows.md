@@ -31,18 +31,37 @@ Docker Desktop 29.6.2.
    separately; that page covers it, and it is the one thing here that can need
    a second reboot.
 
-2. **Docker Desktop.** Download and install from
-   <https://docs.docker.com/desktop/setup/install/windows-install/>, accept the
-   WSL2 backend when offered, and start it. It has to be *running* — the whale
-   in the tray — before any `docker` command works.
+2. **Docker Desktop.** Either
+
+   ```powershell
+   winget install -e --id Docker.DockerDesktop
+   ```
+
+   or download the installer from
+   <https://docs.docker.com/desktop/setup/install/windows-install/>. Accept the
+   WSL2 backend when offered, and start it from the Start menu afterwards. It
+   has to be *running* — the whale in the tray — before any `docker` command
+   works.
 
    Then **Settings → Resources → WSL integration** and enable your Ubuntu
    distribution. Without that, `docker` exists in PowerShell but not in the
    Ubuntu shell, which is where you want it. Docker's page on the backend:
    <https://docs.docker.com/desktop/features/wsl/>
 
-3. **Git**, inside Ubuntu: `sudo apt update && sudo apt install git`. You do not
-   need Git for Windows as well unless you also want to use git from PowerShell.
+3. **Git.** Inside Ubuntu, for shell 1:
+
+   ```bash
+   sudo apt update && sudo apt install -y git
+   ```
+
+   For shell 2 it is Git for Windows instead — `winget install -e --id Git.Git`
+   in PowerShell. You only need both if you intend to use git from both sides.
+
+Then check Docker answers in whichever shell you picked:
+
+```bash
+docker run --rm hello-world
+```
 
 Hyper-V mode and "Windows containers" are not what this needs — the image is a
 Linux one.
