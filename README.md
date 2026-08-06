@@ -40,9 +40,11 @@ machine, an Overleaf extension, or anything installed into the paper itself.
   <https://docs.docker.com/desktop/setup/install/mac-install/>. Apple Silicon
   runs the native `arm64` image.
 - **Windows** — Docker Desktop with the **WSL2 backend**, then work inside the
-  Ubuntu shell — not PowerShell. New to WSL?
-  <https://learn.microsoft.com/windows/wsl/install> and
-  <https://docs.docker.com/desktop/setup/install/windows-install/>.
+  Ubuntu shell, where every command in this repo runs exactly as written. New to
+  WSL? <https://learn.microsoft.com/windows/wsl/install> and
+  <https://docs.docker.com/desktop/setup/install/windows-install/>. PowerShell
+  works too — drop `-u` and use `${PWD}` — but a paper on the Windows
+  filesystem compiles ~2.5× slower, and Git Bash needs care.
 
 Check both are there before going on; the second line should print a hello
 message and exit:
