@@ -1,0 +1,114 @@
+# Windows
+
+Everything in this repo works on Windows. What it needs is **Docker Desktop
+with the WSL2 backend** — the default — and the discipline to do the work
+inside WSL2 rather than beside it.
+
+Tested on Windows 11 (build 26200) with Git for Windows 2.55, WSL 2.7.11 and
+Docker Desktop 29.6.2.
+
+## Installing, if you have not used WSL or Docker before
+
+1. **WSL2 and a Linux distribution.** In an *administrator* PowerShell:
+
+   ```powershell
+   wsl --install
+   ```
+
+   Reboot when it asks. That installs WSL2 and Ubuntu, and on first launch
+   Ubuntu asks you to pick a username and password — unrelated to your Windows
+   account. Microsoft's page, if anything goes sideways:
+   <https://learn.microsoft.com/windows/wsl/install>
+
+   On an older Windows 10 the virtualisation features may need turning on
+   separately; that page covers it, and it is the one thing here that can need
+   a second reboot.
+
+2. **Docker Desktop.** Download and install from
+   <https://docs.docker.com/desktop/setup/install/windows-install/>, accept the
+   WSL2 backend when offered, and start it. It has to be *running* — the whale
+   in the tray — before any `docker` command works.
+
+   Then **Settings → Resources → WSL integration** and enable your Ubuntu
+   distribution. Without that, `docker` exists in PowerShell but not in the
+   Ubuntu shell, which is where you want it. Docker's page on the backend:
+   <https://docs.docker.com/desktop/features/wsl/>
+
+3. **Git**, inside Ubuntu: `sudo apt update && sudo apt install git`. You do not
+   need Git for Windows as well unless you also want to use git from PowerShell.
+
+Hyper-V mode and "Windows containers" are not what this needs — the image is a
+Linux one.
+
+## Then work inside WSL2
+
+Open the Ubuntu shell (Start → Ubuntu, or `wsl` in any terminal), keep the paper
+under `~/`, and **every command in this repo works exactly as written**,
+`$(id -u)` included. Nothing on this page applies once you are there.
+
+A paper under `/mnt/c/...` also compiles, but bind mounts across the Windows
+filesystem boundary cost real time. Measured on one Windows 11 VM, same
+manuscript, three clean compiles each: **11 s from the WSL2 filesystem against
+29 s from `/mnt/c`** — roughly 2.5×. The absolute numbers are that machine's;
+the ratio travels, and it grows with the number of files a compile touches,
+which is exactly what a bibliography and a directory of figures do. Microsoft
+says the same thing at greater length:
+<https://learn.microsoft.com/windows/wsl/filesystems>
+
+Access your Linux files from Explorer with `\\wsl$\Ubuntu\home\<you>`, or type
+`explorer.exe .` in the Ubuntu shell.
+
+## If you would rather stay in PowerShell
+
+Drop `-u` — there is no `id` command to expand, and Docker Desktop maps
+ownership for you:
+
+```powershell
+docker run --rm -v "${PWD}:/work" ghcr.io/tomasvicar/latex-overleaf:latest
+```
+
+Verified: it writes `main.pdf` beside the source, byte-identical to the one the
+Linux command produces, readable and writable from Windows afterwards. In
+`cmd.exe` the mount is `-v "%cd%:/work"`.
+
+## Four traps
+
+All four checked on a real machine, not inferred.
+
+**Git Bash rewrites container paths.** MSYS turns `/work` into
+`C:/Program Files/Git/work` before Docker ever sees it — verbatim, that is what
+`cmd //c echo /work` prints — and the compile stops with *no main.tex ... is the
+project directory mounted at /work?*. Prefix the command with
+`MSYS_NO_PATHCONV=1`, or write the container side as `//work`.
+
+**`ln -s` does not fail — it silently copies.** In Git Bash,
+`ln -s AGENTS.md CLAUDE.md` exits 0 and leaves you a *second regular file*.
+Editing `AGENTS.md` afterwards changes nothing in `CLAUDE.md`, which is the
+drift the symlink existed to prevent, arriving quietly. Either accept two files
+and edit both, or ask for a real symlink with
+`MSYS=winsymlinks:nativestrict ln -s AGENTS.md CLAUDE.md`, which needs Developer
+Mode or an elevated shell.
+
+**A committed symlink checks out as a text file.** Git for Windows defaults to
+`core.symlinks=false`, so `CLAUDE.md` stored in the repository as a symlink
+arrives as a 9-byte file containing the string `AGENTS.md` — and an agent
+reading it finds that instead of your instructions. This is the one trap that
+hits people who are not on Windows themselves: **if anyone on the paper uses
+Windows, commit two real files.** `core.symlinks=true` can be set per clone, but
+it is not something you can impose on a co-author from inside the repo, and
+`.gitattributes` cannot override it either.
+
+**Line endings.** Git for Windows ships `core.autocrlf=true` in its system
+config, and Overleaf stores LF. Set `git config core.autocrlf input` in the
+paper repo, or a co-author gets a diff touching every line of a file you changed
+one word in.
+
+## Two things that are not about papers
+
+Both cost time on the test VM and are worth knowing if you automate any of this:
+
+- A Tailscale client on Windows does not reconnect after a reboot until someone
+  logs in. `tailscale up --unattended` fixes it.
+- `docker-credential-desktop` does not work in a non-interactive SSH session, so
+  `docker pull` from one fails on credential lookup. Run it from a logged-in
+  session, or remove `credsStore` from `%USERPROFILE%\.docker\config.json`.
