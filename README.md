@@ -259,6 +259,87 @@ named main file, shell-escape, podman, reading a failed build.
 Detail: **[docs/working-with-agents.md](docs/working-with-agents.md)** — the
 directory layout, and prompts worth stealing.
 
+## What to ask it for
+
+Once the paper compiles from the command line, the agent can do the whole loop —
+edit, build, check the PDF, push — without you in the middle. These are the jobs
+that make that worth having. Paste them as they are; they assume you started the
+agent one level **above** the paper, so it can write `lit/` and `review.html`
+next to the manuscript rather than inside it. Anything inside the paper
+directory syncs to Overleaf, so keep working material out of it.
+
+**Proofread, push, and hand me the marked-up copy.**
+
+> Proofread `paper/main.tex`: typos, agreement, tense consistency, and any
+> notation used two different ways. Do not change the meaning, the structure or
+> the references. Then compile in the container, and if it builds, commit and
+> push to Overleaf. Separately, run `latexdiff` between the commit before your
+> edits and the result, and leave me the `diff.pdf` outside the repo so I can
+> see every change you made — do not commit it.
+
+The second document is the point. `diff.pdf` comes out with additions underlined
+and deletions struck through, which is what you review instead of re-reading the
+whole manuscript, and what you send a co-author instead of Overleaf's track
+changes ([docs/tips.md](docs/tips.md)).
+
+**Read the literature before writing the introduction.**
+
+> Spawn subagents to survey recent work on <topic>. Use the arXiv / PubMed /
+> Semantic Scholar MCP servers if they are connected, web search otherwise.
+> Collect what you find in `lit/`: one markdown file of notes per paper —
+> question, method, data, result, limitation — and then a single
+> `lit/summary.html` grouping them by theme, saying what each contributes and
+> where it disagrees with the others. Only write notes on papers you actually
+> opened; list the ones you could not get hold of separately.
+
+and then, as a second turn once you have read the summary:
+
+> From `lit/notes/` and my draft, write the introduction. Every citation must be
+> an entry in `paper/refs.bib` with a DOI you have verified against the source —
+> if you cannot verify it, leave a `\todo{}` instead of a `\cite{}`.
+
+Splitting it in two is what makes it checkable: a model asked to write and cite
+in one breath will produce plausible references that do not exist. Gathering
+first, in files you can open, turns that into something you can spot.
+
+**Five reviewers on the current draft.**
+
+> Run five subagents over `paper/main.tex`, each reviewing as a different
+> reviewer: methods and statistics, novelty against the literature in `lit/`,
+> clarity and structure, figures and tables, reproducibility. Each writes its
+> own review independently. Then merge them into `review.html`: the combined
+> review at the top, and under it a short list of concrete fixes, ordered by how
+> much they matter, each saying which reviewers raised it and where in the paper
+> it belongs. Do not edit the manuscript.
+
+Independent passes are worth more than one long one — the overlap between five
+reviewers is the part you cannot argue with, and where they disagree is usually
+where the paper is genuinely unclear.
+
+**An abstract.**
+
+> Draft three abstracts for the current version of the paper, each under 250
+> words and following <journal>'s structure. Every number in them must already
+> appear in the manuscript, with the section it came from noted beside it. Show
+> me all three; do not touch `main.tex`.
+
+Other things worth handing over, in roughly the order they come up:
+
+- **Check the numbers.** *Every figure in section 4 against
+  `analysis/results/*.csv`; list mismatches, change nothing.* The one job an
+  agent with your data does better than a careful co-author.
+- **Bibliography hygiene.** Deduplicate `refs.bib`, fill in missing DOIs, drop
+  entries nothing cites, make the venue names consistent.
+- **Clean the build.** Work through `build/main.log`: overfull boxes, undefined
+  references, missing citations, one at a time, recompiling after each.
+- **Cut to the limit.** *Get it under eight pages by tightening prose only, and
+  list anything you removed rather than rewrote* — with `texcount -1 -sum` for
+  word limits.
+- **Reformat for another journal.** Swap the document class, refit the figures,
+  and report what no longer fits.
+- **The reply to reviewers.** Comments in `notes/review-r2.md`, one response per
+  point, each change tagged with `\todo{R2.3}` so you can find it in the PDF.
+
 ## Comments, notes and other tips
 
 - Overleaf's **comment threads and track changes are not files**. They live in
